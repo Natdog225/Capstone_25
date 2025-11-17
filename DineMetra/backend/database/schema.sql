@@ -1,5 +1,5 @@
 -- ============================================
--- RushRadar Database Schema
+-- Dinemetra Database Schema
 -- Purpose: Predict wait times, item sales, and busyness levels
 -- ============================================
 -- 1. MENU ITEMS TABLE
