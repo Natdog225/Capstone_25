@@ -1,0 +1,7 @@
+GOLD ORANGE: #ffb917
+
+DARK BLUE: #1e2d4f
+
+BLACK: #000000
+
+WHITE: #ffffff
