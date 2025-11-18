@@ -1,0 +1,93 @@
+{
+  "timestamp": "2025-11-18T17:42:07.675679",
+  "files_processed": {
+    "orders": {
+      "file": "data/orders_raw.csv",
+      "rows": 56222,
+      "columns": [
+        "order_id",
+        "order_timestamp",
+        "party_size",
+        "order_total",
+        "subtotal",
+        "tax_amount",
+        "tip_amount",
+        "order_type",
+        "table_number",
+        "server_id",
+        "order_status",
+        "duration_minutes"
+      ],
+      "size_mb": 4.103466987609863
+    },
+    "order_items": {
+      "file": "data/order_items_raw.csv",
+      "rows": 242624,
+      "columns": [
+        "order_item_id",
+        "order_id",
+        "item_name",
+        "quantity",
+        "unit_price",
+        "item_total",
+        "special_instructions"
+      ],
+      "size_mb": 8.562828063964844
+    },
+    "wait_times": {
+      "file": "data/wait_times_raw.csv",
+      "rows": 34146,
+      "columns": [
+        "wait_time_id",
+        "log_timestamp",
+        "party_size",
+        "quoted_wait_minutes",
+        "actual_wait_minutes",
+        "seated_timestamp",
+        "day_of_week",
+        "hour_of_day",
+        "current_party_count",
+        "current_table_occupancy_pct",
+        "wait_type"
+      ],
+      "size_mb": 2.4595489501953125
+    },
+    "external_factors": {
+      "file": "data/external_factors_raw.csv",
+      "rows": 412,
+      "columns": [
+        "factor_date",
+        "day_of_week",
+        "is_holiday",
+        "holiday_name",
+        "weather_condition",
+        "temperature_high_f",
+        "temperature_low_f",
+        "precipitation_inches",
+        "local_event_name",
+        "local_event_type",
+        "event_attendance_estimated",
+        "event_distance_miles"
+      ],
+      "size_mb": 0.017911911010742188
+    },
+    "menu_items": {
+      "file": "data/menu_items_reference.csv",
+      "rows": 36,
+      "columns": [
+        "item_name",
+        "price",
+        "category",
+        "prep_time_minutes"
+      ],
+      "size_mb": 0.00103759765625
+    }
+  },
+  "total_records": 333440,
+  "issues_found": [
+    "Orders: Missing timestamps: 2811",
+    "Orders: Negative tip amounts: 789",
+    "Orders: Duplicate order IDs: 560",
+    "Order Items: Potential duplicate items detected: 7 variations"
+  ]
+}

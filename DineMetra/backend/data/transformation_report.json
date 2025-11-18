@@ -1,0 +1,35 @@
+{
+  "timestamp": "2025-11-18T17:42:07.880045",
+  "transformations_applied": {
+    "menu_items": [
+      "Standardized item names",
+      "Applied item name deduplication mapping",
+      "Removed 3 duplicate menu items",
+      "Standardized categories"
+    ],
+    "orders": [
+      "Removed 2811 orders with missing timestamps",
+      "Converted timestamps to datetime",
+      "Removed 517 duplicate order IDs",
+      "Fixed 749 negative tip amounts",
+      "Standardized order types"
+    ],
+    "order_items": [
+      "Removed 14343 items with invalid order_ids",
+      "Standardized item names to match menu",
+      "Recalculated item totals"
+    ],
+    "wait_times": [
+      "Converted timestamps to datetime",
+      "Recalculated day_of_week and hour_of_day from timestamps"
+    ],
+    "external_factors": [
+      "Converted dates to datetime",
+      "Standardized weather conditions",
+      "Recalculated day_of_week from dates"
+    ]
+  },
+  "records_cleaned": 333440,
+  "records_removed": 17674,
+  "records_final": 315766
+}
