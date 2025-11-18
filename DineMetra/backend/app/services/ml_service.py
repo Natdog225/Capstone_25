@@ -1,5 +1,5 @@
 """
-Dinemetra ML Service
+DineMetra ML Service
 Handles all machine learning predictions for wait times, busyness, and item sales
 """
 
@@ -66,7 +66,11 @@ class WaitTimePredictor:
             self.model = None
 
     def predict(
-        self, party_size: int, timestamp: datetime, current_occupancy: float
+        self,
+        party_size: int,
+        timestamp: datetime,
+        current_occupancy: float,
+        external_factors: Optional[Dict] = None,
     ) -> Dict:
         """
         Predict wait time for a party
@@ -75,6 +79,7 @@ class WaitTimePredictor:
             party_size: Number of people in party
             timestamp: When they're arriving
             current_occupancy: Current table occupancy percentage (0-100)
+            external_factors: Dict with weather, events, holidays
 
         Returns:
             {
@@ -87,12 +92,37 @@ class WaitTimePredictor:
         hour_of_day = timestamp.hour
         day_of_week = timestamp.weekday()
 
+        # Extract external factors if provided
+        event_impact = 0
+        weather_impact = 0
+        if external_factors:
+            event_impact = self._calculate_event_impact(external_factors, timestamp)
+            weather_impact = self._calculate_weather_impact(external_factors)
+
         # If no model trained yet, use baseline heuristic
         if self.model is None:
-            return self._baseline_prediction(party_size, hour_of_day, current_occupancy)
+            return self._baseline_prediction(
+                party_size,
+                hour_of_day,
+                current_occupancy,
+                event_impact,
+                weather_impact,
+                external_factors,
+            )
 
-        # Prepare features
-        features = np.array([[party_size, hour_of_day, day_of_week, current_occupancy]])
+        # Prepare features (add event and weather features)
+        features = np.array(
+            [
+                [
+                    party_size,
+                    hour_of_day,
+                    day_of_week,
+                    current_occupancy,
+                    event_impact,
+                    weather_impact,
+                ]
+            ]
+        )
 
         # Make prediction
         predicted_minutes = int(self.model.predict(features)[0])
@@ -108,11 +138,20 @@ class WaitTimePredictor:
                 "hour": hour_of_day,
                 "day_of_week": day_of_week,
                 "occupancy_pct": current_occupancy,
+                "event_impact": event_impact,
+                "weather_impact": weather_impact,
+                "external_factors": external_factors,
             },
         }
 
     def _baseline_prediction(
-        self, party_size: int, hour: int, occupancy: float
+        self,
+        party_size: int,
+        hour: int,
+        occupancy: float,
+        event_impact: float = 0,
+        weather_impact: float = 0,
+        external_factors: Optional[Dict] = None,
     ) -> Dict:
         """
         Simple rule-based prediction when no ML model is available
@@ -130,17 +169,34 @@ class WaitTimePredictor:
         # Occupancy factor (busier = longer wait)
         occupancy_factor = occupancy * 0.3
 
-        total_wait = base_wait + party_factor + peak_factor + occupancy_factor
+        # Add event impact
+        # Add weather impact
+
+        total_wait = (
+            base_wait
+            + party_factor
+            + peak_factor
+            + occupancy_factor
+            + event_impact
+            + weather_impact
+        )
+
+        factors = {
+            "party_size": party_size,
+            "hour": hour,
+            "occupancy_pct": occupancy,
+            "event_impact_minutes": event_impact,
+            "weather_impact_minutes": weather_impact,
+            "note": "Using baseline prediction (model not trained yet)",
+        }
+
+        if external_factors:
+            factors["external_factors"] = external_factors
 
         return {
             "predicted_wait_minutes": int(total_wait),
             "confidence": 0.6,  # Lower confidence for baseline
-            "factors": {
-                "party_size": party_size,
-                "hour": hour,
-                "occupancy_pct": occupancy,
-                "note": "Using baseline prediction (model not trained yet)",
-            },
+            "factors": factors,
         }
 
     def _calculate_confidence(self, party_size: int, occupancy: float) -> float:
@@ -159,6 +215,99 @@ class WaitTimePredictor:
             confidence -= 0.1
 
         return max(0.5, min(1.0, confidence))
+
+    def _calculate_event_impact(
+        self, external_factors: Dict, timestamp: datetime
+    ) -> float:
+        """
+        Calculate how much a nearby event will increase wait times
+
+        Returns: Additional wait time in minutes (0-30)
+        """
+        if not external_factors or "event_name" not in external_factors:
+            return 0
+
+        # Base impact from event type
+        event_type = external_factors.get("event_type", "").lower()
+        type_impact = {
+            "sports": 15,  # Thunder game = big impact
+            "concert": 12,  # Concert = moderate impact
+            "festival": 10,  # Festival = moderate impact
+            "conference": 5,  # Conference = small impact
+        }.get(event_type, 0)
+
+        # Adjust by attendance
+        attendance = external_factors.get("event_attendance_estimated", 0)
+        if attendance > 15000:
+            attendance_multiplier = 1.5  # Massive event
+        elif attendance > 5000:
+            attendance_multiplier = 1.2  # Large event
+        elif attendance > 1000:
+            attendance_multiplier = 1.0  # Medium event
+        else:
+            attendance_multiplier = 0.5  # Small event
+
+        # Adjust by distance from restaurant
+        distance_miles = external_factors.get("event_distance_miles", 10)
+        if distance_miles < 0.5:
+            distance_multiplier = 1.5  # Right next door!
+        elif distance_miles < 1:
+            distance_multiplier = 1.2  # Walking distance
+        elif distance_miles < 3:
+            distance_multiplier = 1.0  # Short drive
+        elif distance_miles < 5:
+            distance_multiplier = 0.5  # Nearby
+        else:
+            distance_multiplier = 0.2  # Far away
+
+        # Adjust by time proximity to event
+        # Events impact 1-2 hours before and after
+        event_time = external_factors.get("event_time")  # Should be a datetime
+        if event_time:
+            hours_until_event = (event_time - timestamp).total_seconds() / 3600
+            if -2 <= hours_until_event <= 2:
+                time_multiplier = 1.0  # During event window
+            elif -3 <= hours_until_event <= 3:
+                time_multiplier = 0.5  # Near event time
+            else:
+                time_multiplier = 0.1  # Event is far away in time
+        else:
+            time_multiplier = 1.0  # Assume it's during event time
+
+        total_impact = (
+            type_impact * attendance_multiplier * distance_multiplier * time_multiplier
+        )
+
+        return min(30, max(0, total_impact))  # Cap at 30 minutes, minimum 0
+
+    def _calculate_weather_impact(self, external_factors: Dict) -> float:
+        """
+        Calculate how weather affects wait times
+
+        Returns: Impact on wait time in minutes (-5 to +10)
+        """
+        if not external_factors:
+            return 0
+
+        weather = external_factors.get("weather_condition", "").lower()
+        precipitation = external_factors.get("precipitation_inches", 0)
+        temp = external_factors.get("temperature_high_f", 70)
+
+        impact = 0
+
+        # Rain/snow drives people indoors (increases wait)
+        if weather in ["rainy", "snowy", "stormy"]:
+            impact += 5 + (precipitation * 2)  # More rain = more impact
+
+        # Extreme temperatures drive people indoors
+        if temp < 32 or temp > 95:
+            impact += 3  # Too cold or too hot
+
+        # Nice weather reduces indoor dining (negative impact)
+        if weather in ["sunny", "clear"] and 65 <= temp <= 85:
+            impact -= 5  # People want to be outside
+
+        return max(-5, min(10, impact))  # Cap between -5 and +10 minutes
 
 
 class BusynessPredictor:
