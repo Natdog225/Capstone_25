@@ -6,7 +6,6 @@ import {
   ChevronRight, Zap, Shield, TrendingUp, Users, Activity,
   Layers, Award, ArrowUp, Menu, X, Star, Check
 } from 'lucide-react';
-import jsx from 'react';
 
 const VisionUILanding = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
