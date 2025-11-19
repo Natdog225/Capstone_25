@@ -1,20 +1,8 @@
-// App.js - Main Router
-import React, { useState } from 'react';
-import VisionUILanding from './components/LandingPage';
+import React from 'react';
 import Dashboard from './components/Dashboard';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('landing');
-
-  return (
-    <div style={{ minHeight: '100vh' }}>
-      {currentPage === 'landing' ? (
-        <VisionUILanding onGetStarted={() => setCurrentPage('dashboard')} />
-      ) : (
-        <Dashboard onBack={() => setCurrentPage('landing')} />
-      )}
-    </div>
-  );
+  return <Dashboard />;
 }
 
 export default App;

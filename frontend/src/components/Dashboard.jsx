@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import {
   TrendingUp, Users, Activity, Zap, DollarSign, ShoppingCart,
-  Flag, ArrowUp, Menu, Bell, Search, ChevronDown
+  Flag, ArrowUp, Menu, Bell, Search, ChevronDown, Layers
 } from 'lucide-react';
 
 // Individual Stat Card Component
@@ -15,6 +15,7 @@ const StatCard = ({ title, value, change, icon: Icon, color }) => {
   
   return (
     <div
+    
       style={{
         background: 'linear-gradient(135deg, rgba(255, 185, 23, 0.1) 0%, rgba(32, 110, 182, 0.1) 100%)',
         borderRadius: '16px',
