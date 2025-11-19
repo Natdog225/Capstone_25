@@ -6,11 +6,12 @@ import {
   ChevronRight, Zap, Shield, TrendingUp, Users, Activity,
   Layers, Award, ArrowUp, Menu, X, Star, Check
 } from 'lucide-react';
-import jsx from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const VisionUILanding = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMetric, setActiveMetric] = useState(0);
+  const navigate = useNavigate();
 
   const lineData = [
     { name: 'Jan', value: 2400 },
@@ -231,16 +232,29 @@ const VisionUILanding = () => {
             <a href="#dashboard" style={styles.navLink}>Dashboard</a>
             <a href="#pricing" style={styles.navLink}>Pricing</a>
             <a href="#about" style={styles.navLink}>About</a>
-            <button style={styles.primaryButton}>
-              Get Started
+            <button 
+                style={styles.primaryButton} 
+                onClick={() => navigate('/dashboard')}
+            >
+                Get Started
             </button>
           </div>
-          <button
+            <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            style={{display: window.innerWidth <= 768 ? 'block' : 'none', background: 'none', border: 'none', color: '#ffffff', cursor: 'pointer'}}
-          >
+            style={styles.mobileMenuButton}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                e.currentTarget.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'none';
+                e.currentTarget.style.transform = 'scale(1)';
+            }}
+            aria-label="Toggle navigation menu"
+            aria-expanded={isMenuOpen}
+            >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            </button>
         </div>
       </nav>
 
