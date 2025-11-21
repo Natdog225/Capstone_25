@@ -109,7 +109,7 @@ flowchart TB
 │  └──────────────────────────────────────────────────────────┘│
 │                                                               │
 │  ┌────────────────────────┐  ┌──────────────────────────────┐│
-│  │  PREDICTED VS ACTUAL   │  │  INVENTORY ALERTS            ││
+│  │  PREDICTED VS ACTUAL   │  │  INVENTORY ALERTS  (premium) ││
 │  │                        │  │                              ││
 │  │  Tomorrow (Fri):       │  │  ⚠️ High demand expected:    ││
 │  │  Burger: 85 (±8)       │  │     • Ground beef (120 lbs) ││
