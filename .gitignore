@@ -1,1 +1,3 @@
-.env.localDineMetra/database/fastapi-env/
+#have to ignore fastapi due to merge conflicts
+.env.local
+DineMetra/database/fastapi-env/
