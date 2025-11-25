@@ -1,5 +1,4 @@
 # DineMetra
-Forecast. Prepare. Perform.
 
 ## Description
 Web App for Restaurant Managers that predicts how busy a restaurant will be depending on factors such as past sales data, weather, and other events in the area.
