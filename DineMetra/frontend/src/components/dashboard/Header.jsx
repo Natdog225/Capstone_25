@@ -1,8 +1,8 @@
 import React from 'react';
-import { Calendar, ChevronDown } from 'lucide-react';
+import { Calendar, ChevronDown, LogOut } from 'lucide-react';
 import './CSS/Header.css';
 
-const Header = ({ selectedWeek, onWeekChange }) => {
+const Header = ({ selectedWeek, onWeekChange, onLogout }) => {
   return (
     <header className="dashboard-header">
       <div className="header-content">
@@ -26,6 +26,30 @@ const Header = ({ selectedWeek, onWeekChange }) => {
             </select>
             <ChevronDown size={16} className="dropdown-arrow" />
           </div>
+          
+          <button 
+            onClick={onLogout}
+            className="logout-button"
+            style={{
+              marginLeft: '1rem',
+              padding: '0.5rem 1rem',
+              background: '#ff4444',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              transition: 'background 0.3s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#cc0000'}
+            onMouseLeave={(e) => e.target.style.background = '#ff4444'}
+          >
+            <LogOut size={18} />
+            Logout
+          </button>
         </div>
       </div>
     </header>
