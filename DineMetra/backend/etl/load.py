@@ -59,4 +59,3 @@ def load_dataframes(menu_items, orders, order_items, wait_times, external_factor
         insert_dataframe(external_factors, "external_factors", conn)
 
     logging.info("All DataFrames loaded successfully")
-    
