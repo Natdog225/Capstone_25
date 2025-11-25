@@ -1,0 +1,37 @@
+item_name,price,category,prep_time_minutes
+Wings,12.99,Appetizers,15
+Buffalo Wings,12.99,Apps,15
+Mozzarella Sticks,9.99,Appetizers,10
+Mozz Sticks,9.99,Apps,10
+Loaded Nachos,11.99,Appetizers,12
+Spinach Artichoke Dip,10.99,Appetizers,8
+Classic Burger,14.99,Entrees,18
+Cheeseburger,15.99,Entrees,18
+Bacon Burger,16.99,Entrees,20
+Grilled Chicken Sandwich,13.99,Entrees,15
+BBQ Chicken Pizza,17.99,Entrees,25
+Margherita Pizza,15.99,Entrees,25
+Pepperoni Pizza,16.99,Entrees,25
+Caesar Salad,11.99,Salads,8
+House Salad,9.99,Salads,8
+Ribeye Steak,28.99,Entrees,30
+Salmon Fillet,22.99,Entrees,20
+Pasta Carbonara,16.99,Entrees,18
+Chicken Alfredo,17.99,Entrees,18
+French Fries,4.99,Sides,8
+Fries,4.99,Sides,8
+Sweet Potato Fries,5.99,Sides,10
+Onion Rings,5.99,Sides,10
+Cole Slaw,3.99,Sides,2
+Steamed Vegetables,4.99,Sides,8
+Chocolate Cake,7.99,Desserts,5
+Cheesecake,8.99,Desserts,5
+Ice Cream,5.99,Desserts,3
+Brownie Sundae,8.99,Desserts,5
+Coke,2.99,Beverages,1
+Diet Coke,2.99,Beverages,1
+Sprite,2.99,Beverages,1
+Iced Tea,2.99,Beverages,1
+Coffee,2.49,Beverages,2
+Beer,5.99,Alcohol,1
+Wine,8.99,Alcohol,1

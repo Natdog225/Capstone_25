@@ -1,0 +1,229 @@
+{
+  "timestamp": "2025-11-19T18:32:28.547800",
+  "models_trained": {
+    "wait_time": {
+      "model_type": "RandomForestRegressor",
+      "test_mae": 7.2412369756412245,
+      "test_rmse": 9.03680662218245,
+      "test_r2": 0.44340306754203973,
+      "features": [
+        "party_size",
+        "hour_of_day",
+        "day_of_week",
+        "current_table_occupancy_pct",
+        "current_party_count",
+        "is_weekend",
+        "is_peak_hour",
+        "is_lunch",
+        "is_dinner",
+        "occupancy_low",
+        "occupancy_high",
+        "party_small",
+        "party_large"
+      ],
+      "training_samples": 27316
+    },
+    "busyness": {
+      "model_type": "RandomForestClassifier",
+      "test_accuracy": 0.9084967320261438,
+      "features": [
+        "hour",
+        "day_of_week",
+        "avg_party_size",
+        "is_weekend",
+        "is_lunch",
+        "is_dinner",
+        "is_peak_hour",
+        "is_holiday",
+        "weather_cloudy",
+        "weather_rainy",
+        "weather_snowy",
+        "weather_sunny"
+      ],
+      "training_samples": 4283
+    },
+    "item_sales": {
+      "model_type": "GradientBoostingRegressor",
+      "test_mae": 5.072199748343464,
+      "test_r2": 0.6166381062099866,
+      "features": [
+        "day_of_week",
+        "is_weekend",
+        "is_holiday",
+        "historical_avg_sales",
+        "category_Alcohol",
+        "category_Appetizers",
+        "category_Beverages",
+        "category_Desserts",
+        "category_Entrees",
+        "category_Salads",
+        "category_Sides"
+      ],
+      "training_samples": 3296,
+      "items_covered": [
+        "Diet Coke",
+        "Coke",
+        "Wings",
+        "Coffee",
+        "Beer",
+        "Sprite",
+        "Iced Tea",
+        "Wine",
+        "French Fries",
+        "Bbq Chicken Pizza"
+      ]
+    }
+  },
+  "feature_importance": {
+    "wait_time": [
+      {
+        "feature": "current_table_occupancy_pct",
+        "importance": 0.595021428206945
+      },
+      {
+        "feature": "occupancy_high",
+        "importance": 0.23942106817282194
+      },
+      {
+        "feature": "current_party_count",
+        "importance": 0.0951154600192666
+      },
+      {
+        "feature": "hour_of_day",
+        "importance": 0.019530496157411432
+      },
+      {
+        "feature": "party_size",
+        "importance": 0.01887139108687726
+      },
+      {
+        "feature": "day_of_week",
+        "importance": 0.018740465356741905
+      },
+      {
+        "feature": "occupancy_low",
+        "importance": 0.005558700873519207
+      },
+      {
+        "feature": "party_small",
+        "importance": 0.002987360756612684
+      },
+      {
+        "feature": "is_weekend",
+        "importance": 0.002138723297437366
+      },
+      {
+        "feature": "party_large",
+        "importance": 0.0009814041349844604
+      },
+      {
+        "feature": "is_lunch",
+        "importance": 0.0008021281072294054
+      },
+      {
+        "feature": "is_dinner",
+        "importance": 0.0007128219040492895
+      },
+      {
+        "feature": "is_peak_hour",
+        "importance": 0.00011855192610336713
+      }
+    ],
+    "busyness": [
+      {
+        "feature": "is_peak_hour",
+        "importance": 0.29152862200824536
+      },
+      {
+        "feature": "is_dinner",
+        "importance": 0.21109439030359212
+      },
+      {
+        "feature": "hour",
+        "importance": 0.19733283609833724
+      },
+      {
+        "feature": "is_lunch",
+        "importance": 0.13752175928653884
+      },
+      {
+        "feature": "day_of_week",
+        "importance": 0.064154180535805
+      },
+      {
+        "feature": "avg_party_size",
+        "importance": 0.046991600799096235
+      },
+      {
+        "feature": "is_weekend",
+        "importance": 0.0453020505375697
+      },
+      {
+        "feature": "weather_cloudy",
+        "importance": 0.0015530615823232702
+      },
+      {
+        "feature": "weather_rainy",
+        "importance": 0.001389720944800459
+      },
+      {
+        "feature": "weather_sunny",
+        "importance": 0.0012294605879786171
+      },
+      {
+        "feature": "weather_snowy",
+        "importance": 0.0010868043652283788
+      },
+      {
+        "feature": "is_holiday",
+        "importance": 0.0008155129504847561
+      }
+    ],
+    "item_sales": [
+      {
+        "feature": "historical_avg_sales",
+        "importance": 0.6625260479908439
+      },
+      {
+        "feature": "day_of_week",
+        "importance": 0.26759893767132586
+      },
+      {
+        "feature": "category_Entrees",
+        "importance": 0.02987749551315689
+      },
+      {
+        "feature": "category_Sides",
+        "importance": 0.027740116726886158
+      },
+      {
+        "feature": "is_holiday",
+        "importance": 0.005010658259519198
+      },
+      {
+        "feature": "category_Appetizers",
+        "importance": 0.003867427139256667
+      },
+      {
+        "feature": "is_weekend",
+        "importance": 0.0015219958506555718
+      },
+      {
+        "feature": "category_Alcohol",
+        "importance": 0.000983193919452001
+      },
+      {
+        "feature": "category_Beverages",
+        "importance": 0.0008741269289036949
+      },
+      {
+        "feature": "category_Desserts",
+        "importance": 0.0
+      },
+      {
+        "feature": "category_Salads",
+        "importance": 0.0
+      }
+    ]
+  }
+}
