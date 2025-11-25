@@ -219,6 +219,16 @@ class DataExtractor:
         """Extract external factors data"""
         logger.info("🌤️  Extracting external factors data...")
 
+        # Try to load file with events first
+        file_path_with_events = self.data_dir / "external_factors_with_events.csv"
+        file_path = self.data_dir / "external_factors_raw.csv"
+    
+        if file_path_with_events.exists():
+            file_path = file_path_with_events
+            logger.info("   Using external factors WITH event data")
+    
+        df = pd.read_csv(file_path)
+
         file_path = self.data_dir / "external_factors_raw.csv"
 
         if not file_path.exists():

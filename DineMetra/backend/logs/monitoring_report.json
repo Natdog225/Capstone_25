@@ -1,0 +1,41 @@
+{
+  "generated_at": "2025-11-20T13:41:04.333430",
+  "period_days": 30,
+  "overall_status": "healthy",
+  "models": {
+    "wait_time": {
+      "status": "healthy",
+      "sample_size": 600,
+      "mae": 3.582933202164775,
+      "rmse": 4.533874329189457,
+      "r2": 0.756262105405785,
+      "within_5min_pct": 74.5,
+      "recent_mae": 4.137827267662962,
+      "previous_mae": 3.0280391366665866,
+      "trend": "degrading",
+      "last_updated": "2025-11-20T13:41:04.329453"
+    },
+    "busyness": {
+      "status": "healthy",
+      "sample_size": 450,
+      "accuracy": 0.9177777777777778,
+      "class_accuracy": {
+        "slow": 0.9402985074626866,
+        "moderate": 0.9141104294478528,
+        "peak": 0.9019607843137255
+      },
+      "last_updated": "2025-11-20T13:41:04.332027"
+    },
+    "item_sales": {
+      "status": "healthy",
+      "sample_size": 300,
+      "mae": 6.633333333333334,
+      "rmse": 8.388086790204307,
+      "r2": 0.6901703960073844,
+      "last_updated": "2025-11-20T13:41:04.333367"
+    }
+  },
+  "recommendations": [
+    "\ud83d\udcc9 Wait time predictions degrading over time"
+  ]
+}

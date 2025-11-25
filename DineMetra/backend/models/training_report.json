@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-11-18T17:42:07.673342",
+  "timestamp": "2025-11-20T13:42:56.540670",
   "models_trained": {
     "wait_time": {
       "model_type": "RandomForestRegressor",
       "test_mae": 7.2412369756412245,
       "test_rmse": 9.03680662218245,
-      "test_r2": 0.44340306754203984,
+      "test_r2": 0.44340306754203973,
       "features": [
         "party_size",
         "hour_of_day",
