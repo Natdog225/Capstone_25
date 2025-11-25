@@ -1,15 +1,16 @@
 {
-  "timestamp": "2025-11-20T13:42:56.540670",
+  "timestamp": "2025-11-25T12:55:20.324792",
   "models_trained": {
     "wait_time": {
       "model_type": "RandomForestRegressor",
-      "test_mae": 7.2412369756412245,
-      "test_rmse": 9.03680662218245,
-      "test_r2": 0.44340306754203973,
+      "test_mae": 7.24668586639486,
+      "test_rmse": 9.045147849929975,
+      "test_r2": 0.4423750839536251,
       "features": [
         "party_size",
         "hour_of_day",
         "day_of_week",
+        "month",
         "current_table_occupancy_pct",
         "current_party_count",
         "is_weekend",
@@ -25,10 +26,11 @@
     },
     "busyness": {
       "model_type": "RandomForestClassifier",
-      "test_accuracy": 0.9084967320261438,
+      "test_accuracy": 0.9103641456582633,
       "features": [
         "hour",
         "day_of_week",
+        "month",
         "avg_party_size",
         "is_weekend",
         "is_lunch",
@@ -44,10 +46,11 @@
     },
     "item_sales": {
       "model_type": "GradientBoostingRegressor",
-      "test_mae": 5.072199748343464,
-      "test_r2": 0.6166381062099866,
+      "test_mae": 5.154237093914518,
+      "test_r2": 0.6022765333409307,
       "features": [
         "day_of_week",
+        "month",
         "is_weekend",
         "is_holiday",
         "historical_avg_sales",
@@ -78,143 +81,155 @@
     "wait_time": [
       {
         "feature": "current_table_occupancy_pct",
-        "importance": 0.595021428206945
+        "importance": 0.562578503460557
       },
       {
         "feature": "occupancy_high",
-        "importance": 0.23942106817282194
+        "importance": 0.24171501021760097
       },
       {
         "feature": "current_party_count",
-        "importance": 0.0951154600192666
+        "importance": 0.08902882648365897
+      },
+      {
+        "feature": "month",
+        "importance": 0.031919091150467996
       },
       {
         "feature": "hour_of_day",
-        "importance": 0.019530496157411432
+        "importance": 0.02173549474033982
       },
       {
         "feature": "party_size",
-        "importance": 0.01887139108687726
+        "importance": 0.020556055252988464
       },
       {
         "feature": "day_of_week",
-        "importance": 0.018740465356741905
+        "importance": 0.019894293706253816
       },
       {
         "feature": "occupancy_low",
-        "importance": 0.005558700873519207
+        "importance": 0.0041637761387012685
       },
       {
         "feature": "party_small",
-        "importance": 0.002987360756612684
+        "importance": 0.0034086696913222256
       },
       {
         "feature": "is_weekend",
-        "importance": 0.002138723297437366
+        "importance": 0.002180862074423497
       },
       {
         "feature": "party_large",
-        "importance": 0.0009814041349844604
+        "importance": 0.0009448860351553772
       },
       {
         "feature": "is_lunch",
-        "importance": 0.0008021281072294054
+        "importance": 0.0008526373145354213
       },
       {
         "feature": "is_dinner",
-        "importance": 0.0007128219040492895
+        "importance": 0.0007791040126688876
       },
       {
         "feature": "is_peak_hour",
-        "importance": 0.00011855192610336713
+        "importance": 0.000242789721326261
       }
     ],
     "busyness": [
       {
         "feature": "is_peak_hour",
-        "importance": 0.29152862200824536
+        "importance": 0.28698273061078283
       },
       {
         "feature": "is_dinner",
-        "importance": 0.21109439030359212
+        "importance": 0.23032092833692444
       },
       {
         "feature": "hour",
-        "importance": 0.19733283609833724
+        "importance": 0.166471614327778
       },
       {
         "feature": "is_lunch",
-        "importance": 0.13752175928653884
+        "importance": 0.15481988829073726
       },
       {
         "feature": "day_of_week",
-        "importance": 0.064154180535805
-      },
-      {
-        "feature": "avg_party_size",
-        "importance": 0.046991600799096235
+        "importance": 0.05551169553967744
       },
       {
         "feature": "is_weekend",
-        "importance": 0.0453020505375697
+        "importance": 0.051574868865817615
+      },
+      {
+        "feature": "avg_party_size",
+        "importance": 0.037262379609443716
+      },
+      {
+        "feature": "month",
+        "importance": 0.010825399540151213
       },
       {
         "feature": "weather_cloudy",
-        "importance": 0.0015530615823232702
+        "importance": 0.0016855936952877642
       },
       {
         "feature": "weather_rainy",
-        "importance": 0.001389720944800459
+        "importance": 0.0015520871378578223
       },
       {
         "feature": "weather_sunny",
-        "importance": 0.0012294605879786171
+        "importance": 0.001175821264485509
       },
       {
         "feature": "weather_snowy",
-        "importance": 0.0010868043652283788
+        "importance": 0.001043205438124215
       },
       {
         "feature": "is_holiday",
-        "importance": 0.0008155129504847561
+        "importance": 0.000773787342932329
       }
     ],
     "item_sales": [
       {
         "feature": "historical_avg_sales",
-        "importance": 0.6625260479908439
+        "importance": 0.6545855368377747
       },
       {
         "feature": "day_of_week",
-        "importance": 0.26759893767132586
+        "importance": 0.2628686830001923
+      },
+      {
+        "feature": "month",
+        "importance": 0.03752667327550275
       },
       {
         "feature": "category_Entrees",
-        "importance": 0.02987749551315689
+        "importance": 0.022231417815991427
       },
       {
         "feature": "category_Sides",
-        "importance": 0.027740116726886158
+        "importance": 0.0073499274150455336
       },
       {
         "feature": "is_holiday",
-        "importance": 0.005010658259519198
+        "importance": 0.005311069488908554
       },
       {
         "feature": "category_Appetizers",
-        "importance": 0.003867427139256667
+        "importance": 0.003928017942544489
       },
       {
         "feature": "is_weekend",
-        "importance": 0.0015219958506555718
-      },
-      {
-        "feature": "category_Alcohol",
-        "importance": 0.000983193919452001
+        "importance": 0.002600130238710802
       },
       {
         "feature": "category_Beverages",
-        "importance": 0.0008741269289036949
+        "importance": 0.0022138059741386453
+      },
+      {
+        "feature": "category_Alcohol",
+        "importance": 0.0013847380111908177
       },
       {
         "feature": "category_Desserts",

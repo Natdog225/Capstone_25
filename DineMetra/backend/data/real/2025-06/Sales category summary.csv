@@ -1,0 +1,6 @@
+Sales category,Items,Net sales,Discount amount,Refund amount,Gross sales,Tax amount
+Beer,156.0,918.5,0.0,0.0,918.5,196.8
+Food,4709.0,49695.02,690.18,0.0,50385.2,4216.73
+NA Beverage,1590.0,3101.67,1.48,0.0,3103.15,262.54
+Retail,7.0,35.0,12.0,0.0,47.0,2.98
+Total,6462.0,53750.19,703.66,0.0,54453.85,4679.05
