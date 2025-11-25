@@ -111,6 +111,7 @@ class ModelTrainer:
         - party_size
         - hour_of_day
         - day_of_week
+        - month
         - current_table_occupancy_pct
         - is_weekend
         - is_peak_hour
@@ -133,6 +134,7 @@ class ModelTrainer:
         df['is_peak_hour'] = df['hour_of_day'].isin([11, 12, 13, 17, 18, 19, 20]).astype(int)
         df['is_lunch'] = df['hour_of_day'].isin([11, 12, 13]).astype(int)
         df['is_dinner'] = df['hour_of_day'].isin([17, 18, 19, 20]).astype(int)
+        df['month'] = pd.to_datetime(df['log_timestamp']).dt.month
         
         # Calculate occupancy categories
         df['occupancy_low'] = (df['current_table_occupancy_pct'] < 50).astype(int)
@@ -147,6 +149,7 @@ class ModelTrainer:
             'party_size',
             'hour_of_day',
             'day_of_week',
+            'month',
             'current_table_occupancy_pct',
             'current_party_count',
             'is_weekend',
@@ -303,6 +306,7 @@ class ModelTrainer:
         hourly_data['is_lunch'] = hourly_data['hour'].isin([11, 12, 13]).astype(int)
         hourly_data['is_dinner'] = hourly_data['hour'].isin([17, 18, 19, 20]).astype(int)
         hourly_data['is_peak_hour'] = hourly_data['hour'].isin([11, 12, 13, 17, 18, 19, 20]).astype(int)
+        hourly_data['month'] = pd.to_datetime(hourly_data['date']).dt.month
         
         # Merge with external factors
         external = data['external_factors'].copy()
@@ -323,6 +327,7 @@ class ModelTrainer:
         feature_columns = [
             'hour',
             'day_of_week',
+            'month',
             'avg_party_size',
             'is_weekend',
             'is_lunch',
@@ -456,6 +461,8 @@ class ModelTrainer:
         
         # Feature engineering
         daily_sales['is_weekend'] = daily_sales['day_of_week'].isin([5, 6]).astype(int)
+        daily_sales['month'] = pd.to_datetime(daily_sales['date']).dt.month
+
         
         # Calculate historical average sales per item
         item_avg_sales = daily_sales.groupby('item_name')['quantity'].mean().to_dict()
@@ -486,6 +493,7 @@ class ModelTrainer:
         category_features = [col for col in daily_sales_top.columns if col.startswith('category_')]
         feature_columns = [
             'day_of_week',
+            'month',
             'is_weekend',
             'is_holiday',
             'historical_avg_sales'
