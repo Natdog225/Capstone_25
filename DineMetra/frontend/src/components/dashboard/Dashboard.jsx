@@ -5,14 +5,26 @@ import HighlightCards from './Highlightcards.jsx';
 import MetricsGrid from './Metricsgrid.jsx';
 import InfoSections from './Infosections.jsx';
 import './CSS/Dashboard.css';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [selectedWeek, setSelectedWeek] = useState('this-week');
 
   const handleWeekChange = (week) => {
     setSelectedWeek(week);
-    // Here you would typically fetch new data based on the selected week
     console.log('Week changed to:', week);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
@@ -20,7 +32,8 @@ const Dashboard = () => {
       <div className="container">
         <Header 
           selectedWeek={selectedWeek} 
-          onWeekChange={handleWeekChange} 
+          onWeekChange={handleWeekChange}
+          onLogout={handleLogout}
         />
         
         <main className="dashboard-main">
