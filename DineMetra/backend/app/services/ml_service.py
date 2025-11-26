@@ -24,18 +24,18 @@ class WaitTimePredictor:
     """
     Predicts restaurant wait times based on:
     - Party size, Time, Day, Month, Occupancy
-    - Real-time Weather & Events (Auto-fetched)
+    - Learned Weather Impact (Model-driven)
+    - Real-time Events (Heuristic-driven)
     """
 
     def __init__(self):
         self.model = None
         self.model_path = "models/wait_time_model.pkl"
 
-        # Initialize external services once
         self.event_service = EventService() if EventService else None
         self.weather_service = WeatherService() if WeatherService else None
 
-        # This must match train_models.py EXACTLY
+        # MUST MATCH train_models.py EXACTLY (Order matters!)
         self.feature_columns = [
             "party_size",
             "hour_of_day",
@@ -46,6 +46,11 @@ class WaitTimePredictor:
             "is_weekend",
             "is_peak_hour",
             "is_lunch",
+            # Weather comes here in the training script
+            "weather_rainy",
+            "weather_snowy",
+            "weather_cloudy",
+            "weather_sunny",
             "is_dinner",
             "occupancy_low",
             "occupancy_high",
@@ -59,7 +64,6 @@ class WaitTimePredictor:
             with open(self.model_path, "rb") as f:
                 data = pickle.load(f)
                 self.model = data["model"]
-                self.metadata = data.get("metadata", {})
             print(f"✓ Wait time model loaded")
         else:
             print("⚠ No trained model found. Using baseline prediction.")
@@ -74,56 +78,62 @@ class WaitTimePredictor:
     ) -> Dict:
         """
         Predict wait time.
-        If external_factors is None, it auto-fetches them from Event/Weather services.
+        Auto-fetches Weather & Events if not provided.
         """
 
-        # === 1. Auto-Fetch External Factors ===
+        # === 1. Fetch External Data ===
         event_impact = 0
-        weather_impact = 0
+        weather_condition = "sunny"  # Default
 
         if external_factors:
-            # Use provided factors (e.g., for testing/simulation)
+            # Manual overrides
             event_impact = external_factors.get("event_impact_minutes", 0)
-            weather_impact = external_factors.get("weather_impact_minutes", 0)
+            if "test_weather_condition" in external_factors:
+                weather_condition = external_factors["test_weather_condition"]
         else:
-            # Auto-fetch logic
+            # Auto-fetch Events (Heuristic)
             try:
-                if self.event_service and hasattr(
-                    self.event_service, "calculate_impact"
-                ):
+                if self.event_service:
                     event_impact = self.event_service.calculate_impact(timestamp)
-            except Exception as e:
-                print(f"⚠️ Event fetch warning: {e}")
+            except Exception:
+                pass
 
+            # Auto-fetch Weather String (For the Model)
             try:
-                if self.weather_service and hasattr(
-                    self.weather_service, "calculate_impact"
-                ):
-                    weather_impact = self.weather_service.calculate_impact(timestamp)
-            except Exception as e:
-                print(f"⚠️ Weather fetch warning: {e}")
+                if self.weather_service:
+                    forecast = self.weather_service.get_forecast(timestamp)
+                    # We need the string like "Rain", "Clear", "Snow"
+                    if forecast:
+                        weather_condition = forecast.get("shortForecast", "sunny")
+            except Exception:
+                pass
 
-        # === 2. Extract Base Features ===
+        # === 2. Manual One-Hot Encoding for Weather ===
+        # The model doesn't understand "Rain", it understands [1, 0, 0, 0]
+        w = weather_condition.lower()
+        w_rainy = 1 if ("rain" in w or "drizzle" in w or "storm" in w) else 0
+        w_snowy = 1 if ("snow" in w or "ice" in w or "blizzard" in w) else 0
+        w_cloudy = 1 if ("cloud" in w or "overcast" in w or "fog" in w) else 0
+        # If none of the bad stuff, assume sunny/clear
+        w_sunny = 1 if (w_rainy == 0 and w_snowy == 0 and w_cloudy == 0) else 0
+
+        # === 3. Prepare Features ===
         hour = timestamp.hour
         day = timestamp.weekday()
         month = timestamp.month
+        est_party_count = int((current_occupancy / 100) * 30)
 
-        # Engineer Derived Features
+        # Derived features logic
         is_weekend = 1 if day in [5, 6] else 0
         is_peak = 1 if hour in [11, 12, 13, 17, 18, 19, 20] else 0
         is_lunch = 1 if hour in [11, 12, 13] else 0
         is_dinner = 1 if hour in [17, 18, 19, 20] else 0
-
         occupancy_low = 1 if current_occupancy < 50 else 0
         occupancy_high = 1 if current_occupancy >= 75 else 0
-
         party_small = 1 if party_size <= 2 else 0
         party_large = 1 if party_size >= 6 else 0
 
-        # Estimate party count
-        est_party_count = int((current_occupancy / 100) * 30)
-
-        # === 3. Create Feature DataFrame ===
+        # Construct the DataFrame in EXACT order
         features = pd.DataFrame(
             [
                 [
@@ -136,6 +146,10 @@ class WaitTimePredictor:
                     is_weekend,
                     is_peak,
                     is_lunch,
+                    w_rainy,
+                    w_snowy,
+                    w_cloudy,
+                    w_sunny,  # <--- Weather flags inserted here
                     is_dinner,
                     occupancy_low,
                     occupancy_high,
@@ -151,11 +165,11 @@ class WaitTimePredictor:
             return self._baseline_prediction(party_size, hour, current_occupancy)
 
         try:
-            # Base ML Prediction
             base_prediction = int(self.model.predict(features)[0])
 
-            # Add Real-World Impacts
-            total_wait = base_prediction + int(event_impact) + int(weather_impact)
+            # Only add Event impact manually.
+            # Weather impact is now BAKED INTO base_prediction by the model!
+            total_wait = base_prediction + int(event_impact)
 
             confidence = self._calculate_confidence(party_size, current_occupancy)
 
@@ -165,11 +179,9 @@ class WaitTimePredictor:
                 "factors": {
                     "party_size": party_size,
                     "occupancy": current_occupancy,
-                    "month": month,
-                    "is_peak": bool(is_peak),
-                    "is_weekend": bool(is_weekend),
+                    "weather": weather_condition,
                     "event_impact_minutes": int(event_impact),
-                    "weather_impact_minutes": int(weather_impact),
+                    "season": "Holiday" if month in [11, 12] else "Regular",
                 },
             }
         except Exception as e:
