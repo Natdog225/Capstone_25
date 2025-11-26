@@ -10,20 +10,30 @@ from typing import Dict, List, Optional
 import pickle
 import os
 
+# === NEW IMPORTS: Connect to the outside world ===
+try:
+    from app.services.event_service import EventService
+    from app.services.weather_service import WeatherService
+except ImportError:
+    print("⚠️ Could not import external services. Running in offline mode.")
+    EventService = None
+    WeatherService = None
+
 
 class WaitTimePredictor:
     """
     Predicts restaurant wait times based on:
-    - Party size
-    - Time of day
-    - Day of week
-    - Current occupancy
-    - Historical patterns
+    - Party size, Time, Day, Month, Occupancy
+    - Real-time Weather & Events (Auto-fetched)
     """
 
     def __init__(self):
         self.model = None
         self.model_path = "models/wait_time_model.pkl"
+
+        # Initialize external services once
+        self.event_service = EventService() if EventService else None
+        self.weather_service = WeatherService() if WeatherService else None
 
         # This must match train_models.py EXACTLY
         self.feature_columns = [
@@ -63,15 +73,42 @@ class WaitTimePredictor:
         external_factors: Optional[Dict] = None,
     ) -> Dict:
         """
-        Predict wait time with full feature engineering
+        Predict wait time.
+        If external_factors is None, it auto-fetches them from Event/Weather services.
         """
-        # 1. Extract Base Features
+
+        # === 1. Auto-Fetch External Factors ===
+        event_impact = 0
+        weather_impact = 0
+
+        if external_factors:
+            # Use provided factors (e.g., for testing/simulation)
+            event_impact = external_factors.get("event_impact_minutes", 0)
+            weather_impact = external_factors.get("weather_impact_minutes", 0)
+        else:
+            # Auto-fetch logic
+            try:
+                if self.event_service and hasattr(
+                    self.event_service, "calculate_impact"
+                ):
+                    event_impact = self.event_service.calculate_impact(timestamp)
+            except Exception as e:
+                print(f"⚠️ Event fetch warning: {e}")
+
+            try:
+                if self.weather_service and hasattr(
+                    self.weather_service, "calculate_impact"
+                ):
+                    weather_impact = self.weather_service.calculate_impact(timestamp)
+            except Exception as e:
+                print(f"⚠️ Weather fetch warning: {e}")
+
+        # === 2. Extract Base Features ===
         hour = timestamp.hour
         day = timestamp.weekday()
         month = timestamp.month
 
-        # 2. Engineer Derived Features (Match train_models.py logic)
-        # This is the part your previous code was missing!
+        # Engineer Derived Features
         is_weekend = 1 if day in [5, 6] else 0
         is_peak = 1 if hour in [11, 12, 13, 17, 18, 19, 20] else 0
         is_lunch = 1 if hour in [11, 12, 13] else 0
@@ -83,11 +120,10 @@ class WaitTimePredictor:
         party_small = 1 if party_size <= 2 else 0
         party_large = 1 if party_size >= 6 else 0
 
-        # Estimation: If we don't have exact party count, estimate from occupancy
-        # Assuming ~30 tables max capacity
+        # Estimate party count
         est_party_count = int((current_occupancy / 100) * 30)
 
-        # 3. Create Feature DataFrame (Must have 13 columns)
+        # === 3. Create Feature DataFrame ===
         features = pd.DataFrame(
             [
                 [
@@ -110,16 +146,21 @@ class WaitTimePredictor:
             columns=self.feature_columns,
         )
 
-        # 4. Predict
+        # === 4. Predict ===
         if self.model is None:
             return self._baseline_prediction(party_size, hour, current_occupancy)
 
         try:
-            predicted_minutes = int(self.model.predict(features)[0])
+            # Base ML Prediction
+            base_prediction = int(self.model.predict(features)[0])
+
+            # Add Real-World Impacts
+            total_wait = base_prediction + int(event_impact) + int(weather_impact)
+
             confidence = self._calculate_confidence(party_size, current_occupancy)
 
             return {
-                "predicted_wait_minutes": max(0, predicted_minutes),
+                "predicted_wait_minutes": max(0, total_wait),
                 "confidence": confidence,
                 "factors": {
                     "party_size": party_size,
@@ -127,6 +168,8 @@ class WaitTimePredictor:
                     "month": month,
                     "is_peak": bool(is_peak),
                     "is_weekend": bool(is_weekend),
+                    "event_impact_minutes": int(event_impact),
+                    "weather_impact_minutes": int(weather_impact),
                 },
             }
         except Exception as e:
@@ -134,7 +177,6 @@ class WaitTimePredictor:
             return self._baseline_prediction(party_size, hour, current_occupancy)
 
     def _baseline_prediction(self, party_size, hour, occupancy, *args):
-        """Fallback if model fails or isn't loaded"""
         base = 10
         if hour in [18, 19]:
             base += 15
@@ -168,7 +210,6 @@ class BusynessPredictor:
         self.model_path = "models/busyness_model.pkl"
         self.label_mapping = {0: "slow", 1: "moderate", 2: "peak"}
 
-        # Must match training_report.json EXACTLY
         self.feature_columns = [
             "hour",
             "day_of_week",
@@ -184,7 +225,7 @@ class BusynessPredictor:
             "weather_snowy",
             "weather_sunny",
         ]
-        self.load_model()  # Load immediately on init
+        self.load_model()
 
     def load_model(self):
         if os.path.exists(self.model_path):
@@ -202,39 +243,31 @@ class BusynessPredictor:
         if self.model is None:
             return {"level": "moderate", "confidence": 0.0, "note": "Model not loaded"}
 
-        # 1. Base Time Features
         hour = timestamp.hour
         day = timestamp.weekday()
         month = timestamp.month
 
-        # 2. Derived Features
         is_weekend = 1 if day in [5, 6] else 0
         is_peak = 1 if hour in [11, 12, 13, 17, 18, 19, 20] else 0
         is_lunch = 1 if hour in [11, 12, 13] else 0
         is_dinner = 1 if hour in [17, 18, 19, 20] else 0
-        # Holiday: Simplified check (could use external service in future)
         is_holiday = 0
 
-        # 3. Weather Features (One-Hot Encoding)
-        # Default to all 0
         w_cloudy = w_rainy = w_snowy = w_sunny = 0
 
         if weather:
             w = weather.lower()
-            if "rain" in w or "drizzle" in w or "storm" in w:
+            if "rain" in w or "drizzle" in w:
                 w_rainy = 1
-            elif "snow" in w or "ice" in w:
+            elif "snow" in w:
                 w_snowy = 1
-            elif "cloud" in w or "overcast" in w:
+            elif "cloud" in w:
                 w_cloudy = 1
             elif "sun" in w or "clear" in w:
                 w_sunny = 1
 
-        # 4. Avg Party Size (Future prediction requires an estimate)
-        # We use the historical average (approx 2.4 from your data)
         avg_party_size = 2.4
 
-        # 5. Create Feature DataFrame
         features = pd.DataFrame(
             [
                 [
@@ -257,13 +290,9 @@ class BusynessPredictor:
         )
 
         try:
-            # Predict
             prediction_idx = self.model.predict(features)[0]
             level = self.label_mapping.get(prediction_idx, "moderate")
-
-            # Estimate guests based on level (heuristic for now)
             guests_map = {"slow": 15, "moderate": 45, "peak": 85}
-
             return {
                 "level": level,
                 "confidence": 0.85,
@@ -321,17 +350,13 @@ class ItemSalesPredictor:
         if self.model is None:
             return {"predicted_quantity": 50, "confidence": 0.0}
 
-        # 1. Time Features
         day = date.weekday()
         month = date.month
         is_weekend = 1 if day in [5, 6] else 0
         is_holiday = 0
 
-        # 2. Item Features
-        # Try to look up historical avg, otherwise default to median (~20)
         hist_avg = self.item_avgs.get(item_name, 20.0)
 
-        # 3. Category One-Hot Encoding
         cat_features = {
             "category_Alcohol": 0,
             "category_Appetizers": 0,
@@ -342,16 +367,13 @@ class ItemSalesPredictor:
             "category_Sides": 0,
         }
 
-        # Simple mapping or fallback
         cat_key = f"category_{category}"
         if cat_key in cat_features:
             cat_features[cat_key] = 1
         else:
-            cat_features["category_Entrees"] = 1  # Fallback
+            cat_features["category_Entrees"] = 1
 
-        # 4. Construct Vector
         features_list = [day, month, is_weekend, is_holiday, hist_avg]
-        # Add category flags in correct order
         for col in self.feature_columns[5:]:
             features_list.append(cat_features.get(col, 0))
 
@@ -379,6 +401,8 @@ item_sales_predictor = ItemSalesPredictor()
 def initialize_models():
     print("🤖 Initializing ML models...")
     wait_time_predictor.load_model()
+    busyness_predictor.load_model()
+    item_sales_predictor.load_model()
     print("✓ ML models ready")
 
 
@@ -395,9 +419,9 @@ def predict_wait_time(
     )
 
 
-def predict_busyness(timestamp, weather=None):
+def predict_busyness(timestamp: datetime, weather: Optional[str] = None) -> Dict:
     return busyness_predictor.predict(timestamp, weather)
 
 
-def predict_item_sales(item_id, date):
+def predict_item_sales(item_id: int, date: datetime):
     return item_sales_predictor.predict_daily_sales(item_id, date)
