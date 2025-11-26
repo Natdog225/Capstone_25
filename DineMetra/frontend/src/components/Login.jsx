@@ -6,8 +6,7 @@ import {
   signInWithPopup 
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
-import { getAuth } from 'firebase/auth';
-
+import './Login.css'; // Import the CSS file
 
 const DineMetraAuth = () => {
   const navigate = useNavigate();
@@ -112,21 +111,20 @@ const handleSignUp = async (e) => {
         alignItems: 'center',
         gap: 'clamp(1rem, 3vw, 2rem)'
       }}>
-        {/* Logo */}
+        {/* Logo with Dinner Plate */}
         <div style={{
           textAlign: 'center',
           marginBottom: '0.5rem',
           width: '100%'
         }}>
-          <img 
-            src="/DineMetra_Logo.png"
-            alt="DineMetra Logo" 
-            style={{
-              maxWidth: 'min(280px, 80vw)',
-              width: '100%',
-              height: 'auto'
-            }}
-          />
+          <div className="dinner-plate-logo">
+            <div className="dinner-plate">
+              <img 
+                src="/DineMetra_Logo.png"
+                alt="DineMetra Logo" 
+              />
+            </div>
+          </div>
         </div>
 
         {/* Error Message */}
@@ -325,7 +323,7 @@ const handleSignUp = async (e) => {
             </button>
           </>
         ) : (
-          // Sign Up Form - NOW MATCHING LOGIN FORM STYLING
+          // Sign Up Form
           <>
             <div style={{
               background: '#ffffff',
