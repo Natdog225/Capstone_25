@@ -4,6 +4,7 @@
       "event_name": "PAW Patrol Live! \"A Mighty Adventure\"",
       "event_type": "other",
       "event_datetime": "2025-11-29T10:00:00",
+      "event_date": "2025-11-29",
       "distance_miles": 0.4410465189408412,
       "attendance_estimated": 15000,
       "venue_name": "BOK Center"
@@ -12,6 +13,7 @@
       "event_name": "PAW PATROL SUITES - 10AM SHOW",
       "event_type": "other",
       "event_datetime": "2025-11-29T10:00:00",
+      "event_date": "2025-11-29",
       "distance_miles": 0.4410465189408412,
       "attendance_estimated": 15000,
       "venue_name": "BOK Center"
@@ -20,6 +22,7 @@
       "event_name": "PAW Patrol Live! \"A Mighty Adventure\"",
       "event_type": "other",
       "event_datetime": "2025-11-29T14:00:00",
+      "event_date": "2025-11-29",
       "distance_miles": 0.4410465189408412,
       "attendance_estimated": 15000,
       "venue_name": "BOK Center"
@@ -28,6 +31,7 @@
       "event_name": "PAW PATROL SUITES - 2PM SHOW",
       "event_type": "other",
       "event_datetime": "2025-11-29T14:00:00",
+      "event_date": "2025-11-29",
       "distance_miles": 0.4410465189408412,
       "attendance_estimated": 15000,
       "venue_name": "BOK Center"
@@ -36,6 +40,7 @@
       "event_name": "Tulsa Golden Hurricane Football vs. UAB Blazers Football",
       "event_type": "sports",
       "event_datetime": "2025-11-29T14:00:00",
+      "event_date": "2025-11-29",
       "distance_miles": 2.730721658305747,
       "attendance_estimated": 20000,
       "venue_name": "H.A. Chapman Stadium"
@@ -44,6 +49,7 @@
       "event_name": "PAW Patrol Live! \"A Mighty Adventure\"",
       "event_type": "other",
       "event_datetime": "2025-11-30T11:00:00",
+      "event_date": "2025-11-30",
       "distance_miles": 0.4410465189408412,
       "attendance_estimated": 15000,
       "venue_name": "BOK Center"
@@ -52,6 +58,7 @@
       "event_name": "PAW PATROL SUITES - 11AM SHOW",
       "event_type": "other",
       "event_datetime": "2025-11-30T11:00:00",
+      "event_date": "2025-11-30",
       "distance_miles": 0.4410465189408412,
       "attendance_estimated": 15000,
       "venue_name": "BOK Center"
@@ -60,6 +67,7 @@
       "event_name": "PAW Patrol Live! \"A Mighty Adventure\"",
       "event_type": "other",
       "event_datetime": "2025-11-30T15:00:00",
+      "event_date": "2025-11-30",
       "distance_miles": 0.4410465189408412,
       "attendance_estimated": 15000,
       "venue_name": "BOK Center"
@@ -68,6 +76,7 @@
       "event_name": "PAW PATROL SUITES - 3PM SHOW",
       "event_type": "other",
       "event_datetime": "2025-11-30T15:00:00",
+      "event_date": "2025-11-30",
       "distance_miles": 0.4410465189408412,
       "attendance_estimated": 15000,
       "venue_name": "BOK Center"
