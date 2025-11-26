@@ -1,41 +1,39 @@
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
-from app.models.schemas import WaitTimePredictionRequest, WaitTimePredictionResponse
+from typing import Optional
+
+from app.models.schemas import WaitTimePredictionRequest, WaitTimePredictionResponse 
+
+# Import ONLY the prediction wrapper
 from app.services.ml_service import predict_wait_time
 
 router = APIRouter()
 
-
 @router.post("/wait-time", response_model=WaitTimePredictionResponse)
 async def predict_wait_time_endpoint(request: WaitTimePredictionRequest):
     """
-    Predict wait time for a party
-    Automatically incorporates nearby events and weather
+    Predict wait time for a party.
+    
+    The ML Service automatically handles:
+    - Determining seasonality (Month/Day)
+    - Fetching live Weather impact
+    - Fetching live Ticketmaster Event impact
     """
-    timestamp = request.timestamp or datetime.now()
+    try:
+        # 1. Prepare the timestamp
+        timestamp = request.timestamp or datetime.now()
 
-    # Fetch external factors
-    external_factors = {}
-
-    # Get events for this date
-    events = event_service.get_events_for_date(timestamp)
-    if events:
-        # Use the biggest/closest event
-        primary_event = max(
-            events, key=lambda e: e.get("event_attendance_estimated", 0)
+        # 2. Call the ML Service 
+        # The service will auto-fetch them if they are None.
+        result = predict_wait_time(
+            party_size=request.party_size,
+            timestamp=timestamp,
+            current_occupancy=request.current_occupancy,
+            external_factors=None  # Let the service fetch the real data
         )
-        external_factors.update(primary_event)
 
-    # Get weather
-    weather = event_service.get_weather_for_date(timestamp)
-    external_factors.update(weather)
+        # 3. Return the result
+        return result
 
-    # Make prediction
-    result = predict_wait_time(
-        party_size=request.party_size,
-        timestamp=timestamp,
-        current_occupancy=request.current_occupancy,
-        external_factors=external_factors if external_factors else None,
-    )
-
-    return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
