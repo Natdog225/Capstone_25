@@ -1,0 +1,61 @@
+/* Login.css - DineMetra Dinner Plate Logo Styling */
+
+/* Dinner Plate Logo Wrapper */
+.dinner-plate-logo {
+    display: inline-block;
+    position: relative;
+}
+
+.dinner-plate {
+    width: 260px;
+    height: 260px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.15),
+        inset 0 -3px 8px rgba(0, 0, 0, 0.05),
+        inset 0 3px 8px rgba(255, 255, 255, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border: 12px solid #ffffff;
+    box-sizing: border-box;
+}
+
+/* Simple inner ring */
+.dinner-plate::before {
+    content: '';
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    pointer-events: none;
+}
+
+.dinner-plate img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    z-index: 1;
+    position: relative;
+    border-radius: 50%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .dinner-plate {
+        width: 220px;
+        height: 220px;
+        border: 10px solid #ffffff;
+    }
+}
+
+@media (max-width: 360px) {
+    .dinner-plate {
+        width: 180px;
+        height: 180px;
+        border: 8px solid #ffffff;
+    }
+}
