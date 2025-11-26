@@ -211,6 +211,24 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 .env.local
+fastapi-env/
+__pycache__/
+*.pyc
+
+#NPM
+node_modules/
+.npm/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+#json files
+*.json
+*.tsv
+*.csv
+
+
+
 
 # frontend
 node_modules/
