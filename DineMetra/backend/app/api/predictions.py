@@ -31,7 +31,7 @@ class SalesRequest(BaseModel):
 
 # --- 1. Wait Time Endpoint ---
 @router.post("/wait-time", response_model=WaitTimePredictionResponse)
-async def predict_wait_time_endpoint(request: WaitTimePredictionRequest):
+async def predict_wait_time_endpoint(request: WaitTimeRequest):
     """
     Predict wait time.
     Auto-fetches Weather & Events, OR uses manual test overrides.
