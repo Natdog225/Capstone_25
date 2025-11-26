@@ -1,0 +1,9 @@
+Dining option,Orders,Net sales,Discount amount,Gross sales,Tax amount
+Catering,2,773.0,0.0,773.0,65.84
+Dine In,1816,42572.97,258.13,42831.1,3773.7
+No Dining Option,1,0.0,0.0,0.0,0.0
+Online Ordering,2,15.55,0.0,15.55,1.32
+Online Ordering - Takeout,234,5988.07,27.28,6015.35,509.73
+Take Out Here,577,9992.15,386.15,10378.3,848.98
+Take Out Phone,123,2975.52,77.48,3053.0,253.35
+Total,2755,62317.26,749.04,63066.30,5452.92

@@ -1,0 +1,299 @@
+.info-sections {
+  margin-bottom: 32px;
+  animation: fadeIn 0.9s ease-out 0.3s both;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.info-icon {
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(32, 110, 182, 0.1);
+  color: var(--primary-blue);
+}
+
+.info-icon.weather {
+  background: rgba(255, 185, 23, 0.1);
+  color: var(--gold-orange);
+}
+
+.info-icon.history {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+}
+
+.info-icon.labor {
+  background: rgba(156, 39, 176, 0.1);
+  color: #9C27B0;
+}
+
+.info-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-bg);
+  margin: 0;
+}
+
+/* Upcoming Events Styles */
+.events-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.event-item:hover {
+  background: #e9ecef;
+}
+
+.event-date {
+  font-weight: 600;
+  color: var(--primary-blue);
+  min-width: 60px;
+}
+
+.event-details {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.event-name {
+  color: var(--dark-bg);
+  font-size: 14px;
+}
+
+.event-bookings {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-dark);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.event-bookings.confirmed {
+  background: rgba(76, 175, 80, 0.2);
+  color: #388E3C;
+}
+
+.view-all-btn {
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid var(--primary-blue);
+  color: var(--primary-blue);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.view-all-btn:hover {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+/* Weather Impact Styles */
+.weather-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.weather-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.weather-label {
+  color: var(--gray-dark);
+  font-size: 14px;
+}
+
+.weather-value {
+  color: var(--dark-bg);
+  font-weight: 500;
+}
+
+.weather-impact-box {
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(255, 185, 23, 0.1) 0%, rgba(255, 185, 23, 0.05) 100%);
+  border-radius: 8px;
+  border-left: 3px solid var(--gold-orange);
+}
+
+.impact-label {
+  display: block;
+  font-size: 12px;
+  color: var(--gray-dark);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.impact-value {
+  color: var(--dark-bg);
+  font-weight: 500;
+}
+
+/* Historical Data Styles */
+.historical-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.stat-row.current {
+  background: linear-gradient(135deg, rgba(32, 110, 182, 0.1) 0%, rgba(32, 110, 182, 0.05) 100%);
+  border: 1px solid rgba(32, 110, 182, 0.2);
+}
+
+.stat-label {
+  color: var(--gray-dark);
+  font-size: 14px;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: var(--dark-bg);
+}
+
+.stat-value.highlight {
+  color: var(--primary-blue);
+}
+
+/* Labor Prediction Styles */
+.labor-card {
+  grid-column: span 2;
+}
+
+.labor-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.labor-metrics {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.labor-metric {
+  text-align: center;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  flex: 1;
+}
+
+.labor-metric.variance {
+  background: linear-gradient(135deg, rgba(255, 185, 23, 0.1) 0%, rgba(255, 185, 23, 0.05) 100%);
+}
+
+.metric-label {
+  display: block;
+  font-size: 12px;
+  color: var(--gray-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary-blue);
+  margin-bottom: 4px;
+}
+
+.metric-unit {
+  font-size: 14px;
+  color: var(--gray-dark);
+}
+
+.recommendation-box {
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.05) 0%, transparent 100%);
+  border-radius: 8px;
+  border-left: 3px solid #9C27B0;
+}
+
+.recommendation-label {
+  display: block;
+  font-size: 12px;
+  color: #9C27B0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.recommendation-text {
+  color: var(--dark-bg);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .labor-card {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .labor-metrics {
+    flex-direction: column;
+  }
+}
