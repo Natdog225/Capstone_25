@@ -19,7 +19,7 @@ scipy==1.15.1
 joblib==1.4.2
 
 # Visualization & Monitoring
-matplotlib==3.8.2
+matplotlib>=3.9.0
 
 # Environment & Configuration
 python-dotenv==1.2.1
