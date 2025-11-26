@@ -21,6 +21,7 @@ RETRY_BACKOFF_SEC = float(os.getenv("ETL_RETRY_BACKOFF_SEC", 1.0))
 
 _conn_pool: Optional[pool.SimpleConnectionPool] = None
 
+
 def _build_conn_kwargs() -> Dict:
     kwargs = {
         "host": PG_HOST,
@@ -36,6 +37,7 @@ def _build_conn_kwargs() -> Dict:
             kwargs["sslrootcert"] = PG_SSLROOTCERT
     return kwargs
 
+
 def init_pool():
     global _conn_pool
     if _conn_pool is not None:
@@ -45,22 +47,29 @@ def init_pool():
     while attempt < RETRY_ATTEMPTS:
         try:
             _conn_pool = pool.SimpleConnectionPool(
-                minconn=PG_POOL_MIN,
-                maxconn=PG_POOL_MAX,
-                **kwargs
+                minconn=PG_POOL_MIN, maxconn=PG_POOL_MAX, **kwargs
             )
             logger.info("DB pool created min=%d max=%d", PG_POOL_MIN, PG_POOL_MAX)
             return
         except OperationalError as e:
             attempt += 1
-            logger.warning("Pool creation failed attempt %d/%d: %s", attempt, RETRY_ATTEMPTS, str(e))
-            import time; time.sleep(RETRY_BACKOFF_SEC * attempt)
+            logger.warning(
+                "Pool creation failed attempt %d/%d: %s",
+                attempt,
+                RETRY_ATTEMPTS,
+                str(e),
+            )
+            import time
+
+            time.sleep(RETRY_BACKOFF_SEC * attempt)
     raise RuntimeError("Could not create DB connection pool")
+
 
 def get_conn():
     if _conn_pool is None:
         init_pool()
     return _conn_pool.getconn()
+
 
 def put_conn(conn):
     if _conn_pool:

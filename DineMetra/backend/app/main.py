@@ -9,9 +9,13 @@ from app.api import predictions
 # Import the model loader
 from app.services.ml_service import initialize_models
 
+#Dashboard stuff
+from app.api import predictions, dashboard
+
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 # --- LIFESPAN MANAGER ---
 # This handles both startup and shutdown logic in one place.
@@ -24,24 +28,25 @@ async def lifespan(app: FastAPI):
         logger.info("✅ ML Models loaded and ready.")
     except Exception as e:
         logger.error(f"❌ Failed to load ML models: {e}")
-    
-    yield # The app runs while execution pauses here
-    
+
+    yield  # The app runs while execution pauses here
+
     # 2. SHUTDOWN LOGIC
     logger.info("🛑 Dinemetra API shutting down...")
+
 
 # --- APP INITIALIZATION ---
 app = FastAPI(
     title="Dinemetra API",
     description="Backend for Restaurant Prediction System",
     version="1.0.0",
-    lifespan=lifespan # <--- Register the lifespan handler here
+    lifespan=lifespan,  # <--- Register the lifespan handler here
 )
 
 # --- CORS CONFIGURATION ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,6 +54,8 @@ app.add_middleware(
 
 # --- ROUTERS ---
 app.include_router(predictions.router, prefix="/api/predictions", tags=["Predictions"])
+app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
+
 
 # --- HEALTH CHECK ---
 @app.get("/")
@@ -56,5 +63,5 @@ def read_root():
     return {
         "status": "online",
         "message": "Dinemetra Intelligence Engine is running",
-        "version": "1.0.0"
+        "version": "1.0.0",
     }
