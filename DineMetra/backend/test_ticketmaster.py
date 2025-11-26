@@ -7,13 +7,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from datetime import datetime, timedelta
-from app.services.event_service import EventDataService
+from app.services.event_service import EventService
 
 def test_api_connection():
     """Test basic API connectivity"""
     print("🧪 Testing Ticketmaster API Connection\n")
     
-    service = EventDataService()
+    service = EventService()
     
     # Check if API key is set
     if not service.ticketmaster_key:

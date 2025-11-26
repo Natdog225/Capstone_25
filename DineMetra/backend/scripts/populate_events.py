@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import logging
 
-from app.services.event_service import EventDataService
+from app.services.event_service import EventService
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def populate_events_for_date_range(start_date: datetime, end_date: datetime):
     logger.info(f"Populating events from {start_date.date()} to {end_date.date()}...")
 
     # Initialize event service
-    service = EventDataService()
+    service = EventService()
 
     # Fetch all events in date range
     all_events = service.fetch_ticketmaster_events(start_date, end_date)

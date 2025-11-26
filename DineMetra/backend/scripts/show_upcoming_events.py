@@ -7,11 +7,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from datetime import datetime, timedelta
-from app.services.event_service import EventDataService
+from app.services.event_service import EventService
 
 def show_upcoming_events(days=7):
     """Display upcoming events"""
-    service = EventDataService()
+    service = EventService()
     
     print(f"\n🎫 Upcoming Events (Next {days} Days)\n")
     print("=" * 80)
