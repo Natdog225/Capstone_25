@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException
 from datetime import datetime
 from app.models.schemas import WaitTimePredictionRequest, WaitTimePredictionResponse
 from app.services.ml_service import predict_wait_time
-from app.services.event_service import event_service
 
 router = APIRouter()
 
