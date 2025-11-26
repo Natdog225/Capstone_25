@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import logging
 
-from app.services.event_service import EventDataService
+from app.services.event_service import EventService
 from app.services.weather_service import WeatherService
 
 logging.basicConfig(level=logging.INFO)
@@ -33,7 +33,7 @@ def update_external_factors(days_ahead: int = 7):
     end_date = start_date + timedelta(days=days_ahead)
     
     # Initialize services
-    event_service = EventDataService()
+    event_service = EventService()
     weather_service = WeatherService()
     
     # Fetch events

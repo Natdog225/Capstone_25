@@ -262,6 +262,7 @@ class EventService:
                 "event_name": name,
                 "event_type": self._classify_event_type(event),
                 "event_datetime": event_datetime.isoformat(),
+                "event_date": event_datetime.date().isoformat(),
                 "distance_miles": distance,
                 "attendance_estimated": attendance,
                 "venue_name": venue.get("name", "Unknown"),
