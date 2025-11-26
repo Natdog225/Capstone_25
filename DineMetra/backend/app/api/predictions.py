@@ -10,13 +10,22 @@ from app.services.ml_service import (
     predict_item_sales,
 )
 
-# Import Schemas (or define them here if you prefer)
-from app.models.schemas import WaitTimePredictionRequest, WaitTimePredictionResponse
+# Import Response Schema only (We use local Request schema for the extra test field)
+from app.models.schemas import WaitTimePredictionResponse
 
 router = APIRouter()
 
-
 # --- Request Models ---
+
+
+class WaitTimeRequest(BaseModel):
+    party_size: int
+    current_occupancy: float
+    timestamp: Optional[datetime] = None
+    # The field allowing manual overrides
+    test_weather_condition: Optional[str] = None
+
+
 class BusynessRequest(BaseModel):
     timestamp: Optional[datetime] = None
     weather_condition: Optional[str] = None
@@ -43,10 +52,9 @@ async def predict_wait_time_endpoint(request: WaitTimeRequest):
         forced_factors = None
 
         if request.test_weather_condition:
-            # FIX: Pass the STRING so the ML model can encode it (e.g., w_snowy=1)
+            # Pass the STRING so the ML model can encode it
             forced_factors = {
                 "test_weather_condition": request.test_weather_condition,
-                # We set event impact to 0 for this specific test to isolate weather
                 "event_impact_minutes": 0,
             }
 
