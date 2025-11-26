@@ -1,29 +1,6 @@
 {
-  "timestamp": "2025-11-26T11:02:42.564049",
+  "timestamp": "2025-11-26T14:00:02.459707",
   "models_trained": {
-    "wait_time": {
-      "model_type": "RandomForestRegressor",
-      "test_mae": 7.246685866394861,
-      "test_rmse": 9.045147849929975,
-      "test_r2": 0.4423750839536251,
-      "features": [
-        "party_size",
-        "hour_of_day",
-        "day_of_week",
-        "month",
-        "current_table_occupancy_pct",
-        "current_party_count",
-        "is_weekend",
-        "is_peak_hour",
-        "is_lunch",
-        "is_dinner",
-        "occupancy_low",
-        "occupancy_high",
-        "party_small",
-        "party_large"
-      ],
-      "training_samples": 27316
-    },
     "busyness": {
       "model_type": "RandomForestClassifier",
       "test_accuracy": 0.9103641456582633,
@@ -78,64 +55,6 @@
     }
   },
   "feature_importance": {
-    "wait_time": [
-      {
-        "feature": "current_table_occupancy_pct",
-        "importance": 0.562578503460557
-      },
-      {
-        "feature": "occupancy_high",
-        "importance": 0.24171501021760097
-      },
-      {
-        "feature": "current_party_count",
-        "importance": 0.08902882648365897
-      },
-      {
-        "feature": "month",
-        "importance": 0.031919091150467996
-      },
-      {
-        "feature": "hour_of_day",
-        "importance": 0.02173549474033982
-      },
-      {
-        "feature": "party_size",
-        "importance": 0.020556055252988464
-      },
-      {
-        "feature": "day_of_week",
-        "importance": 0.019894293706253816
-      },
-      {
-        "feature": "occupancy_low",
-        "importance": 0.0041637761387012685
-      },
-      {
-        "feature": "party_small",
-        "importance": 0.0034086696913222256
-      },
-      {
-        "feature": "is_weekend",
-        "importance": 0.002180862074423497
-      },
-      {
-        "feature": "party_large",
-        "importance": 0.0009448860351553772
-      },
-      {
-        "feature": "is_lunch",
-        "importance": 0.0008526373145354213
-      },
-      {
-        "feature": "is_dinner",
-        "importance": 0.0007791040126688876
-      },
-      {
-        "feature": "is_peak_hour",
-        "importance": 0.000242789721326261
-      }
-    ],
     "busyness": [
       {
         "feature": "is_peak_hour",
