@@ -10,7 +10,7 @@ alembic==1.12.1
 
 # Data Processing & ETL
 pandas==2.3.3
-numpy==2.3.5
+numpy==1.26.4
 python-dateutil==2.9.0.post0
 
 # Machine Learning
