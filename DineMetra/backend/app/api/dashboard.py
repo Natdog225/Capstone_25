@@ -1,11 +1,19 @@
-from fastapi import APIRouter, HTTPException
-from datetime import datetime, timedelta
-from typing import List, Dict, Any
+"""
+Dashboard API - Updated to use Enhanced Prediction Service
+Integrates with your existing services + new dashboard aggregation
+"""
 
-# Import your existing services
+from fastapi import APIRouter, Query
+from datetime import datetime
+from typing import Optional
+
+# Import existing services
 from app.services.event_service import EventService
 from app.services.weather_service import WeatherService
-from app.services.ml_service import predict_item_sales
+
+# Import new enhanced services
+from app.services.enhanced_prediction_service import enhanced_prediction_service
+from app.services.dashboard_service import dashboard_service
 
 router = APIRouter()
 
@@ -13,154 +21,290 @@ router = APIRouter()
 event_service = EventService()
 weather_service = WeatherService()
 
-# --- 1. Dashboard Highlights ---
+
+# =============================================================================
+# CONSOLIDATED DASHBOARD ENDPOINT (RECOMMENDED)
+# =============================================================================
+
+
+@router.get("/dashboard")
+async def get_full_dashboard():
+    """
+    Get complete dashboard in ONE call (best performance!)
+
+    Returns highlights, metrics, info sections, and user data
+    """
+    try:
+        return {
+            "highlights": dashboard_service.get_highlights(),
+            "metrics": dashboard_service.get_metrics(),
+            "info_sections": dashboard_service.get_info_sections(),
+            "user": {"name": "Manager", "restaurant": "Tulsa Capstone Grill"},
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        return {
+            "error": str(e),
+            "highlights": [],
+            "metrics": {},
+            "info_sections": {},
+            "user": {},
+        }
+
+
+# =============================================================================
+# INDIVIDUAL DASHBOARD ENDPOINTS (for flexibility)
+# =============================================================================
+
+
 @router.get("/highlights")
 async def get_dashboard_highlights():
     """
-    Returns key events for the week (Powered by Ticketmaster)
+    Returns key events for the week (Powered by Ticketmaster + Weather)
+    Enhanced with detailed event and weather information
     """
-    today = datetime.now()
-    
-    # Get real events for the next 7 days
-    events = event_service.fetch_ticketmaster_events(today, today + timedelta(days=7))
-    
-    highlights = []
-    
-    # Transform real events into UI cards
-    for i, event in enumerate(events[:3]): # Top 3 only
-        impact = event.get('attendance_estimated', 0)
-        color = "red" if impact > 10000 else "blue"
-        
-        highlights.append({
-            "id": i + 1,
-            "title": event.get('event_name'),
-            "icon": "Calendar",
-            "color": color,
-            "details": f"{event.get('venue_name')} - {event.get('distance_miles')}mi",
-            "subDetails": f"Est. Attendance: {impact:,}",
-            "importance": "high" if impact > 5000 else "medium"
-        })
-    
-    # If no events, show a default card
-    if not highlights:
-        highlights.append({
-            "id": 1,
-            "title": "Quiet Week",
-            "icon": "Sun",
-            "color": "green",
-            "details": "No major events nearby",
-            "subDetails": "Standard prep levels",
-            "importance": "low"
-        })
-        
-    return highlights
+    try:
+        highlights = dashboard_service.get_highlights()
+        return {"highlights": highlights, "timestamp": datetime.now().isoformat()}
+    except Exception as e:
+        return {"highlights": [], "error": str(e)}
 
-# --- 2. Sales Chart Data ---
+
 @router.get("/sales-chart")
-async def get_sales_chart(week: str = "this-week"):
+async def get_sales_chart(
+    week: str = Query("this-week", description="Period: this-week, last-week, custom")
+):
     """
-    Returns simulated sales data enriched with ML predictions for future days
+    Returns sales data with predictions for future days
     """
-    
-    # Mocking the structure for now, but using realistic day names
-    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    chart_data = []
-    
-    for day in days:
-        chart_data.append({
-            "day": day,
-            "thisWeek": 145 + (10 if day in ["Fri", "Sat"] else 0), # Simple logic
-            "pastData": 120,
-            "actual": 138 if day in ["Mon", "Tue"] else None # Only show actual for passed days
-        })
-        
-    return chart_data
+    try:
+        chart_data = dashboard_service.get_sales_chart_data(period=week)
+        return {
+            "data": chart_data,
+            "period": week,
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        return {"data": [], "error": str(e)}
 
-# --- 3. Metrics Grid ---
+
 @router.get("/metrics")
 async def get_metrics_grid():
     """
-    Returns top sellers and KPI summaries
+    Returns top sellers, KPI summaries, and purchasing estimates
+    Enhanced with ML-powered purchasing predictions
     """
-    # connect this to your OrderItems table DB query
-    return {
-      "categories": [{
-        "id": 1,
-        "title": "Best Sellers",
-        "icon": "ShoppingCart",
-        "items": [{"name": "Burger Special", "value": "156", "trend": "up"}]
-      }],
-      "summaries": [{
-        "id": 4,
-        "title": "Labor Cost", 
-        "percentage": "28.5%",
-        "target": "30%",
-        "status": "good"
-      }],
-      "purchasing": [{
-        "item": "Produce",
-        "estimate": "$1,850",
-        "status": "Order Today"
-      }]
-    }
+    try:
+        metrics = dashboard_service.get_metrics()
+        return {
+            "categories": metrics.get("categories", []),
+            "summaries": metrics.get("summaries", []),
+            "purchasing": metrics.get("purchasing", []),
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        return {"categories": [], "summaries": [], "purchasing": [], "error": str(e)}
 
-# --- 4. Info Sections (Weather/Events) ---
+
 @router.get("/info-sections")
 async def get_info_sections():
     """
-    Aggregates Weather, Events, and Labor info
+    Aggregates Weather, Events, Labor, and Historical data
+    Uses real weather.gov + Ticketmaster data
     """
-    today = datetime.now()
-    
-    # 1. Get Real Weather
-    weather_summary = {"current": "Unknown", "forecast": "Unknown", "impact": "Low"}
     try:
-        forecast = weather_service.get_forecast(today)
-        if forecast:
-            condition = forecast.get('shortForecast', 'Clear')
-            temp = forecast.get('temperature', 70)
-            weather_summary = {
-                "current": f"{condition}, {temp}°F",
-                "forecast": "Clear week ahead", # Placeholder for full forecast logic
-                "impact": "High Patio Impact" if temp > 60 and 'Rain' not in condition else "Low"
-            }
-    except:
-        pass
+        info = dashboard_service.get_info_sections()
+        return {
+            "events": info.get("events", []),
+            "weather": info.get("weather", {}),
+            "labor": info.get("labor", {}),
+            "historical": info.get("historical", {}),
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        return {
+            "events": [],
+            "weather": {},
+            "labor": {},
+            "historical": {},
+            "error": str(e),
+        }
 
-    # 2. Get Real Events Summary
-    events_list = []
-    events = event_service.get_events_for_date(today)
-    if events:
-        top_event = events[0] # Closest/Biggest
-        events_list.append({
-            "date": "Today",
-            "event": top_event.get('event_name'),
-            "bookings": "High Demand" if top_event.get('attendance_estimated', 0) > 5000 else "Normal"
-        })
-    else:
-        events_list.append({"date": "Today", "event": "No major events", "bookings": "Standard"})
 
-    return {
-      "events": events_list,
-      "weather": weather_summary,
-      "labor": {
-        "predicted": 32,
-        "planned": 30,
-        "variance": "+2",
-        "recommendation": "Add 1 server Saturday"
-      },
-      "historical": {
-        "lastYear": "$42,500",
-        "average": "$38,750", 
-        "projection": "$41,200"
-      }
-    }
+# =============================================================================
+# ENHANCED PREDICTION ENDPOINTS (with detailed factors)
+# =============================================================================
 
-# --- 5. User Profile ---
+
+@router.post("/predictions/wait-time-enhanced")
+async def predict_wait_time_enhanced(
+    party_size: int = Query(..., ge=1, le=20),
+    current_occupancy: float = Query(..., ge=0, le=100),
+    timestamp: Optional[str] = Query(None, description="ISO format datetime"),
+):
+    """
+    Enhanced wait time prediction with detailed factor breakdown
+
+    Shows WHY the prediction is what it is:
+    - Weather impact
+    - Event impact
+    - Time/occupancy factors
+    - Historical comparison
+    """
+    try:
+        target_time = datetime.fromisoformat(timestamp) if timestamp else None
+
+        result = enhanced_prediction_service.predict_wait_time_enhanced(
+            party_size=party_size,
+            current_occupancy=current_occupancy,
+            timestamp=target_time,
+        )
+
+        return result
+
+    except Exception as e:
+        return {"predicted_wait_minutes": 15, "error": str(e), "factors": {}}
+
+
+@router.get("/predictions/busyness-enhanced")
+async def predict_busyness_enhanced(
+    timestamp: Optional[str] = Query(None, description="ISO format datetime")
+):
+    """
+    Enhanced busyness prediction with detailed factor breakdown
+
+    Shows:
+    - Expected busyness level
+    - Weather impact
+    - Nearby events
+    - Staffing recommendations
+    """
+    try:
+        target_time = datetime.fromisoformat(timestamp) if timestamp else None
+
+        result = enhanced_prediction_service.predict_busyness_enhanced(
+            timestamp=target_time
+        )
+
+        return result
+
+    except Exception as e:
+        return {"level": "Moderate", "error": str(e), "factors": {}}
+
+
+@router.get("/predictions/sales-enhanced")
+async def predict_sales_enhanced(
+    item_id: int = Query(..., description="Menu item ID"),
+    target_date: Optional[str] = Query(None, description="ISO format date"),
+    item_name: str = Query("Unknown", description="Item name"),
+    category: str = Query("Entrees", description="Item category"),
+):
+    """
+    Enhanced sales prediction with detailed factor breakdown
+
+    Shows:
+    - Predicted quantity
+    - Confidence with margin
+    - Weather sensitivity
+    - Event impact
+    - Purchasing recommendation
+    """
+    try:
+        target = datetime.fromisoformat(target_date) if target_date else None
+
+        result = enhanced_prediction_service.predict_sales_enhanced(
+            item_id=item_id, target_date=target, item_name=item_name, category=category
+        )
+
+        return result
+
+    except Exception as e:
+        return {
+            "item_id": item_id,
+            "predicted_quantity": 0,
+            "error": str(e),
+            "factors": {},
+        }
+
+
+# =============================================================================
+# USER PROFILE
+# =============================================================================
+
+
 @router.get("/user-profile")
 async def get_user_profile():
-    # Mock for now until Auth is built
+    """Get user profile information"""
+    # TODO: Implement actual auth
     return {
-      "name": "Manager",
-      "restaurant": "Tulsa Capstone Grill"
+        "name": "Manager",
+        "restaurant": "Tulsa Capstone Grill",
+        "email": "manager@tulsagrill.com",
     }
+
+
+# =============================================================================
+# FEEDBACK ENDPOINT (for model improvement)
+# =============================================================================
+
+
+@router.post("/feedback")
+async def submit_feedback(
+    prediction_type: str,
+    prediction_id: str,
+    actual_value: float,
+    notes: Optional[str] = None,
+):
+    """
+    Submit feedback on prediction accuracy
+
+    This data can be used to retrain and improve models
+    """
+    try:
+        feedback_record = {
+            "prediction_type": prediction_type,
+            "prediction_id": prediction_id,
+            "actual_value": actual_value,
+            "notes": notes,
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        # TODO: Store in database for model retraining
+        # For now, just log it
+        print(f"Feedback received: {feedback_record}")
+
+        return {
+            "success": True,
+            "message": "Thank you for your feedback!",
+            "feedback_id": f"fb_{datetime.now().timestamp()}",
+        }
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+# =============================================================================
+# HEALTH CHECK
+# =============================================================================
+
+
+@router.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    try:
+        # Test services
+        weather_ok = weather_service.grid_info is not None
+        events_ok = event_service.ticketmaster_key is not None
+
+        return {
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "services": {
+                "weather": "operational" if weather_ok else "degraded",
+                "events": "operational" if events_ok else "no_api_key",
+                "predictions": "operational",
+                "dashboard": "operational",
+            },
+        }
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e)}
