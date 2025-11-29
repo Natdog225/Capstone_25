@@ -7,7 +7,7 @@ from typing import Dict, Optional
 from datetime import datetime, timedelta
 import logging
 
-# Import your existing services
+# Import existing services
 from app.services.ml_service import (
     wait_time_predictor,
     busyness_predictor,
@@ -23,7 +23,7 @@ class EnhancedPredictionService:
     """Enhanced prediction service that exposes detailed factors for dashboard"""
 
     def __init__(self):
-        """Initialize with your existing services"""
+        """Initialize with existing services"""
         self.wait_time_predictor = wait_time_predictor
         self.busyness_predictor = busyness_predictor
         self.item_sales_predictor = item_sales_predictor
@@ -38,7 +38,7 @@ class EnhancedPredictionService:
     ) -> Dict:
         """
         Enhanced wait time prediction with detailed factors
-        Uses your existing wait_time_predictor and adds factor breakdown
+        Uses existing wait_time_predictor and adds factor breakdown
         """
         if timestamp is None:
             timestamp = datetime.now()
@@ -74,7 +74,7 @@ class EnhancedPredictionService:
                 "wait_category": wait_category,
                 "confidence": base_confidence,
                 "factors": {
-                    # Original factors from your model
+                    # Original factors from model
                     "current_occupancy": round(current_occupancy, 1),
                     "party_size": party_size,
                     "day_of_week": self._get_day_name(timestamp.weekday()),
@@ -82,13 +82,13 @@ class EnhancedPredictionService:
                     "time_period": self._get_time_period(timestamp.hour),
                     "is_weekend": timestamp.weekday() >= 5,
                     "is_peak_hour": timestamp.hour in [11, 12, 13, 17, 18, 19, 20],
-                    # Weather factors (from your model's calculation)
+                    # Weather factors (from model's calculation)
                     "weather_condition": base_factors.get(
                         "weather", weather_data.get("condition", "Unknown")
                     ),
                     "weather_impact_minutes": base_factors.get(
                         "event_impact_minutes", 0
-                    ),  # Your model includes this
+                    ),
                     "temperature_f": weather_data.get("temperature_f"),
                     "precipitation_chance": weather_data.get("precipitation_chance", 0),
                     # Event factors
@@ -117,7 +117,7 @@ class EnhancedPredictionService:
     def predict_busyness_enhanced(self, timestamp: Optional[datetime] = None) -> Dict:
         """
         Enhanced busyness prediction with detailed factors
-        Uses your existing busyness_predictor and adds factor breakdown
+        Uses existing busyness_predictor and adds factor breakdown
         """
         if timestamp is None:
             timestamp = datetime.now()
@@ -127,7 +127,7 @@ class EnhancedPredictionService:
             weather_data = self._get_weather_details(timestamp)
             weather_condition = weather_data.get("condition", "sunny")
 
-            # Get base prediction from YOUR model
+            # Get base prediction from model
             base_result = self.busyness_predictor.predict(
                 timestamp=timestamp, weather=weather_condition
             )
@@ -143,7 +143,7 @@ class EnhancedPredictionService:
             # Generate recommendation
             recommendation = self._generate_busyness_recommendation(level, event_data)
 
-            # Calculate percentage (your model gives level, we convert to %)
+            # Calculate percentage (model gives level, we convert to %)
             percentage_map = {"slow": 30, "moderate": 50, "peak": 85}
             percentage = percentage_map.get(level.lower(), 50)
 
@@ -197,13 +197,13 @@ class EnhancedPredictionService:
     ) -> Dict:
         """
         Enhanced sales prediction with detailed factors
-        Uses your existing item_sales_predictor and adds factor breakdown
+        Uses existing item_sales_predictor and adds factor breakdown
         """
         if target_date is None:
             target_date = datetime.now()
 
         try:
-            # Get base prediction from YOUR model
+            # Get base prediction from model
             base_result = self.item_sales_predictor.predict_daily_sales(
                 item_id=item_id,
                 date=target_date,
@@ -279,23 +279,75 @@ class EnhancedPredictionService:
     # Helper methods
 
     def _get_weather_details(self, timestamp: datetime) -> Dict:
-        """Get weather details for a timestamp"""
+        """
+        Get weather details for a timestamp - CONSISTENT VERSION
+
+        Always uses forecast data for consistency across predictions
+        """
         try:
-            weather = self.weather_service.get_weather_for_date(timestamp)
-            if weather:
-                return {
-                    "condition": weather.get("condition", "Unknown"),
-                    "temperature_f": weather.get("temperature_high_f"),
-                    "precipitation_chance": weather.get("precipitation_chance", 0),
-                }
+            # Get all forecasts
+            forecasts = self.weather_service.get_forecast(days=7)
+
+            target_date = timestamp.date().isoformat()
+
+            # Find matching forecast
+            for forecast in forecasts:
+                if forecast.get("date") == target_date:
+                    return {
+                        "condition": forecast.get("condition", "Unknown"),
+                        "temperature_f": forecast.get("temperature_high_f"),
+                        "precipitation_chance": forecast.get("precipitation_chance", 0),
+                    }
+
+            # If no forecast match and it's today, use current weather
+            if timestamp.date() == datetime.now().date():
+                current = self.weather_service.get_current_weather()
+                if current:
+                    # Standardize the condition text
+                    condition_text = current.get("condition", "")
+                    # Use weather service's standardization method
+                    condition = self._standardize_weather_condition(condition_text)
+
+                    return {
+                        "condition": condition,
+                        "temperature_f": current.get("temperature_f"),
+                        "precipitation_chance": 0,
+                    }
+
+            # Fallback to unknown
+            return {
+                "condition": "Unknown",
+                "temperature_f": None,
+                "precipitation_chance": 0,
+            }
+
         except Exception as e:
             logger.error(f"Error getting weather details: {e}")
+            return {
+                "condition": "Unknown",
+                "temperature_f": None,
+                "precipitation_chance": 0,
+            }
 
-        return {
-            "condition": "Unknown",
-            "temperature_f": None,
-            "precipitation_chance": 0,
-        }
+    def _standardize_weather_condition(self, condition_text: str) -> str:
+        """Standardize weather condition text to match your weather service"""
+        text_lower = condition_text.lower()
+
+        if any(word in text_lower for word in ["thunder", "storm", "severe"]):
+            return "stormy"
+        elif any(word in text_lower for word in ["snow", "flurr", "blizzard"]):
+            return "snowy"
+        elif any(
+            word in text_lower
+            for word in ["rain", "shower", "drizzle", "precipitation"]
+        ):
+            return "rainy"
+        elif any(word in text_lower for word in ["cloud", "overcast", "gray", "fog"]):
+            return "cloudy"
+        elif any(word in text_lower for word in ["sun", "clear", "fair"]):
+            return "sunny"
+        else:
+            return "cloudy"  # Default
 
     def _get_event_details(self, timestamp: datetime) -> Dict:
         """Get event details for a timestamp"""
