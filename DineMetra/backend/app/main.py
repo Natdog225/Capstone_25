@@ -10,7 +10,7 @@ from app.api import predictions
 from app.services.ml_service import initialize_models
 
 #Dashboard stuff
-from app.api import predictions, dashboard
+from app.api import predictions, dashboard, monitoring
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -22,17 +22,17 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 1. STARTUP LOGIC (Runs before the app starts accepting requests)
-    logger.info("🚀 Starting Dinemetra API...")
+    logger.info("Starting Dinemetra API...")
     try:
         initialize_models()
         logger.info("✅ ML Models loaded and ready.")
     except Exception as e:
-        logger.error(f"❌ Failed to load ML models: {e}")
+        logger.error(f" Failed to load ML models: {e}")
 
     yield  # The app runs while execution pauses here
 
     # 2. SHUTDOWN LOGIC
-    logger.info("🛑 Dinemetra API shutting down...")
+    logger.info("Dinemetra API shutting down...")
 
 
 # --- APP INITIALIZATION ---
@@ -55,6 +55,7 @@ app.add_middleware(
 # --- ROUTERS ---
 app.include_router(predictions.router, prefix="/api/predictions", tags=["Predictions"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
+app.include_router(monitoring.router, prefix="/api/monitoring", tags=["monitoring"])
 
 
 # --- HEALTH CHECK ---
@@ -63,5 +64,5 @@ def read_root():
     return {
         "status": "online",
         "message": "Dinemetra Intelligence Engine is running",
-        "version": "1.0.0",
+        "version": "1.1.0",
     }
