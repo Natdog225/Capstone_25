@@ -1,64 +1,77 @@
 import React from 'react';
-import { ShoppingCart, Wine, Beer, DollarSign, Users, TrendingUp } from 'lucide-react';
+import { 
+  ShoppingCart, 
+  Wine, 
+  Beer, 
+  Users, 
+  TrendingUp,
+  DollarSign
+} from 'lucide-react';
 import './CSS/Metricsgrid.css';
 
-const MetricsGrid = () => {
-  const metrics = [
-    {
-      id: 1,
-      title: 'Best Sellers',
-      icon: ShoppingCart,
-      items: [
-        { name: 'Burger Special', value: '156', trend: 'up' },
-        { name: 'Fish Tacos', value: '132', trend: 'up' },
-        { name: 'Caesar Salad', value: '98', trend: 'down' },
-      ]
-    },
-    {
-      id: 2,
-      title: 'Bar Drinks',
-      icon: Wine,
-      items: [
-        { name: 'Cocktails', value: '245', trend: 'up' },
-        { name: 'Wine', value: '189', trend: 'stable' },
-        { name: 'Spirits', value: '156', trend: 'up' },
-      ]
-    },
-    {
-      id: 3,
-      title: 'Top Beers',
-      icon: Beer,
-      items: [
-        { name: 'IPA Draft', value: '98', trend: 'up' },
-        { name: 'Lager', value: '76', trend: 'stable' },
-        { name: 'Stout', value: '54', trend: 'down' },
-      ]
-    },
-    {
-      id: 4,
-      title: 'Labor Cost',
-      icon: Users,
-      percentage: '28.5%',
-      target: '30%',
-      status: 'good',
-      details: 'Within target range'
-    },
-    {
-      id: 5,
-      title: 'Actual vs Expected',
-      icon: TrendingUp,
-      percentage: '104%',
-      variance: '+$4,200',
-      status: 'excellent',
-      details: 'Exceeding projections'
-    }
-  ];
+const MetricsGrid = ({ metrics = [] }) => {
+  const defaultMetrics = metrics.length > 0 ? metrics : {
+    categories: [
+      {
+        id: 1,
+        title: 'Best Sellers',
+        icon: ShoppingCart,
+        items: [
+          { name: 'Burger Special', value: '156', trend: 'up' },
+          { name: 'Fish Tacos', value: '132', trend: 'up' },
+          { name: 'Caesar Salad', value: '98', trend: 'down' },
+        ]
+      },
+      {
+        id: 2,
+        title: 'Bar Drinks',
+        icon: Wine,
+        items: [
+          { name: 'Cocktails', value: '245', trend: 'up' },
+          { name: 'Wine', value: '189', trend: 'stable' },
+          { name: 'Spirits', value: '156', trend: 'up' },
+        ]
+      },
+      {
+        id: 3,
+        title: 'Top Beers',
+        icon: Beer,
+        items: [
+          { name: 'IPA Draft', value: '98', trend: 'up' },
+          { name: 'Lager', value: '76', trend: 'stable' },
+          { name: 'Stout', value: '54', trend: 'down' },
+        ]
+      }
+    ],
+    summaries: [
+      {
+        id: 4,
+        title: 'Labor Cost',
+        icon: Users,
+        percentage: '28.5%',
+        target: '30%',
+        status: 'good',
+        details: 'Within target range'
+      },
+      {
+        id: 5,
+        title: 'Actual vs Expected',
+        icon: TrendingUp,
+        percentage: '104%',
+        variance: '+$4,200',
+        status: 'excellent',
+        details: 'Exceeding projections'
+      }
+    ]
+  };
 
-  const purchasingEstimates = [
+  const defaultPurchasing = [
     { item: 'Produce', estimate: '$1,850', status: 'Order Today' },
     { item: 'Meat/Seafood', estimate: '$2,400', status: 'Order Tomorrow' },
     { item: 'Bar Supplies', estimate: '$980', status: 'Stock OK' }
   ];
+
+  const purchasingEstimates = metrics.purchasing || defaultPurchasing;
 
   return (
     <div className="metrics-section">
@@ -68,7 +81,7 @@ const MetricsGrid = () => {
       </div>
 
       <div className="metrics-grid">
-        {metrics.slice(0, 3).map((metric) => {
+        {(defaultMetrics.categories || []).map((metric) => {
           const Icon = metric.icon;
           return (
             <div key={metric.id} className="metric-card card">
@@ -94,7 +107,7 @@ const MetricsGrid = () => {
       </div>
 
       <div className="secondary-metrics">
-        {metrics.slice(3).map((metric) => {
+        {(defaultMetrics.summaries || []).map((metric) => {
           const Icon = metric.icon;
           return (
             <div key={metric.id} className={`metric-highlight card ${metric.status}`}>
@@ -124,7 +137,7 @@ const MetricsGrid = () => {
                 <span className="purchasing-name">{item.item}</span>
                 <span className="purchasing-estimate">{item.estimate}</span>
               </div>
-              <span className={`purchasing-status ${item.status.toLowerCase().replace(' ', '-')}`}>
+              <span className={`purchasing-status ${item.status.toLowerCase().replace(/\s+/g, '-')}`}>
                 {item.status}
               </span>
             </div>

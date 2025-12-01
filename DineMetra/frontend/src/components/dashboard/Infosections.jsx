@@ -2,25 +2,35 @@ import React from 'react';
 import { Calendar, Cloud, History, Users, ArrowRight } from 'lucide-react';
 import './CSS/Infosections.css';
 
-const InfoSections = () => {
-  const upcomingEvents = [
-    { date: 'Nov 28', event: 'Thanksgiving Special Menu', bookings: '85%' },
-    { date: 'Dec 5', event: 'Wine Tasting Event', bookings: '60%' },
-    { date: 'Dec 15', event: 'Holiday Party - Private', bookings: 'Confirmed' },
-  ];
-
-  const weatherImpact = {
-    current: 'Clear skies expected',
-    forecast: 'Weekend: 30% rain chance',
-    impact: 'Moderate patio seating impact'
+const InfoSections = ({ infoData = {} }) => {
+  const defaultData = {
+    events: [
+      { date: 'Nov 28', event: 'Thanksgiving Special Menu', bookings: '85%' },
+      { date: 'Dec 5', event: 'Wine Tasting Event', bookings: '60%' },
+      { date: 'Dec 15', event: 'Holiday Party - Private', bookings: 'Confirmed' },
+    ],
+    weather: {
+      current: 'Clear skies expected',
+      forecast: 'Weekend: 30% rain chance',
+      impact: 'Moderate patio seating impact'
+    },
+    labor: {
+      predicted: 32,
+      planned: 30,
+      variance: '+2',
+      recommendation: 'Consider adding 1 server for Saturday peak'
+    },
+    historical: {
+      lastYear: '$42,500',
+      average: '$38,750',
+      projection: '$41,200'
+    }
   };
 
-  const laborPrediction = {
-    predicted: 32,
-    planned: 30,
-    variance: '+2',
-    recommendation: 'Consider adding 1 server for Saturday peak'
-  };
+  const upcomingEvents = infoData.events || defaultData.events;
+  const weatherImpact = infoData.weather || defaultData.weather;
+  const laborPrediction = infoData.labor || defaultData.labor;
+  const historicalData = infoData.historical || defaultData.historical;
 
   return (
     <div className="info-sections">
@@ -81,15 +91,15 @@ const InfoSections = () => {
           <div className="historical-stats">
             <div className="stat-row">
               <span className="stat-label">Same Week Last Year</span>
-              <span className="stat-value">$42,500</span>
+              <span className="stat-value">{historicalData.lastYear}</span>
             </div>
             <div className="stat-row">
               <span className="stat-label">4-Week Average</span>
-              <span className="stat-value">$38,750</span>
+              <span className="stat-value">{historicalData.average}</span>
             </div>
             <div className="stat-row current">
               <span className="stat-label">This Week Projection</span>
-              <span className="stat-value highlight">$41,200</span>
+              <span className="stat-value highlight">{historicalData.projection}</span>
             </div>
           </div>
         </div>

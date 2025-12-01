@@ -6,6 +6,8 @@ import {
   signInWithPopup 
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
+import { getAuth } from 'firebase/auth';
+
 
 const DineMetraAuth = () => {
   const navigate = useNavigate();
@@ -27,56 +29,70 @@ const DineMetraAuth = () => {
   };
 
   const handleSignIn = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      navigate('/dashboard');
-    } catch (error) {
-      setError(error.message.replace('Firebase: ', ''));
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault();
+  setError('');
+  setLoading(true);
+  try {
+    const result = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+    await storeFirebaseToken(result.user); // Store token
+    navigate('/dashboard');
+  } catch (error) {
+    setError(error.message.replace('Firebase: ', ''));
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setError('');
-    
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match!');
-      return;
-    }
-    
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
+const handleGoogleSignIn = async () => {
+  setError('');
+  setLoading(true);
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    await storeFirebaseToken(result.user); // Store token
+    navigate('/dashboard');
+  } catch (error) {
+    setError(error.message.replace('Firebase: ', ''));
+  } finally {
+    setLoading(false);
+  }
+};
 
-    setLoading(true);
-    try {
-      await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      navigate('/dashboard');
-    } catch (error) {
-      setError(error.message.replace('Firebase: ', ''));
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleSignUp = async (e) => {
+  e.preventDefault();
+  setError('');
+  
+  if (formData.password !== formData.confirmPassword) {
+    setError('Passwords do not match!');
+    return;
+  }
+  
+  if (formData.password.length < 6) {
+    setError('Password must be at least 6 characters');
+    return;
+  }
 
-  const handleGoogleSignIn = async () => {
-    setError('');
-    setLoading(true);
+  setLoading(true);
+  try {
+    const result = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+    await storeFirebaseToken(result.user); // Store token
+    navigate('/dashboard');
+  } catch (error) {
+    setError(error.message.replace('Firebase: ', ''));
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const storeFirebaseToken = async (user) => {
     try {
-      await signInWithPopup(auth, googleProvider);
-      navigate('/dashboard');
+        const token = await user.getIdToken();
+        localStorage.setItem('firebaseToken', token);
+        return token;
     } catch (error) {
-      setError(error.message.replace('Firebase: ', ''));
-    } finally {
-      setLoading(false);
+        console.error('Error storing token:', error);
+        throw error;
     }
-  };
+};
 
   return (
     <div style={{

@@ -6,15 +6,13 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer
 } from 'recharts';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import './CSS/Chartsection.css';
 
-const ChartSection = () => {
-  // Sample data based on the sketch
-  const data = [
+const ChartSection = ({ chartData = [] }) => {
+  const defaultData = chartData.length > 0 ? chartData : [
     { day: 'Mon', thisWeek: 145, pastData: 120, actual: 138 },
     { day: 'Tue', thisWeek: 168, pastData: 145, actual: 160 },
     { day: 'Wed', thisWeek: 135, pastData: 130, actual: 142 },
@@ -70,7 +68,7 @@ const ChartSection = () => {
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
-          data={data}
+          data={defaultData}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
