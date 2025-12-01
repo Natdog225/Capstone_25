@@ -23,14 +23,14 @@ weather_service = WeatherService()
 
 
 # =============================================================================
-# CONSOLIDATED DASHBOARD ENDPOINT (RECOMMENDED)
+# CONSOLIDATED DASHBOARD ENDPOINT
 # =============================================================================
 
 
 @router.get("/dashboard")
 async def get_full_dashboard():
     """
-    Get complete dashboard in ONE call (best performance!)
+    Get complete dashboard in ONE call
 
     Returns highlights, metrics, info sections, and user data
     """

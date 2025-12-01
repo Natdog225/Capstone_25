@@ -15,7 +15,6 @@ from app.services.ml_service import (
     predict_item_sales,
 )
 
-# Import new enhanced service
 from app.services.enhanced_prediction_service import enhanced_prediction_service
 
 # Import Response Schema
