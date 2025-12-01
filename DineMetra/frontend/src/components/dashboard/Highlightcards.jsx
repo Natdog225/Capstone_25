@@ -2,9 +2,28 @@ import React from 'react';
 import { AlertCircle } from 'lucide-react';
 import './CSS/Highlightcards.css';
 
-const HighlightCards = ({ highlights = [] }) => { // Accept highlights prop
-  // If no data from API, use default mock data
-  const defaultHighlights = highlights.length > 0 ? highlights : [
+const HighlightCards = ({ highlights = [] }) => {
+  console.log('Raw highlights data:', highlights);
+
+  // FILTER: Exclude items with specific keywords (case-insensitive)
+  const excludedKeywords = ['SKY CLUB', 'SUITES', 'UPCHARGE', 'CLUB SEATS'];
+  const filteredHighlights = highlights.filter(highlight => {
+    const searchableText = `${highlight.details} ${highlight.subDetails}`.toUpperCase();
+    return !excludedKeywords.some(keyword => searchableText.includes(keyword));
+  });
+
+  // SORT: By importance (high → medium → low)
+  const importanceOrder = { high: 0, medium: 1, low: 2 };
+  const sortedHighlights = [...filteredHighlights].sort((a, b) => {
+    const aLevel = a.importance || 'medium';
+    const bLevel = b.importance || 'medium';
+    return importanceOrder[aLevel] - importanceOrder[bLevel];
+  });
+
+  console.log('Filtered & sorted highlights:', sortedHighlights);
+
+  // Default mock data if API returns nothing
+  const defaultHighlights = sortedHighlights.length > 0 ? sortedHighlights : [
     {
       id: 1,
       title: 'Big Event',
@@ -12,29 +31,11 @@ const HighlightCards = ({ highlights = [] }) => { // Accept highlights prop
       color: 'blue',
       details: 'Jazz Night - Saturday',
       subDetails: 'Expected: 150+ guests',
+      date: '2025-12-07',
       importance: 'high'
-    },
-    {
-      id: 2,
-      title: 'Weather Alert',
-      icon: 'CloudRain',
-      color: 'orange',
-      details: 'Rain 90% Saturday',
-      subDetails: 'Prepare indoor seating',
-      importance: 'high'
-    },
-    {
-      id: 3,
-      title: 'Active Promo',
-      icon: 'Tag',
-      color: 'green',
-      details: 'Happy Hour Extended',
-      subDetails: '45% off selected drinks',
-      importance: 'medium'
     }
   ];
 
-  // Helper to render icons based on string names
   const renderIcon = (iconName) => {
     const icons = {
       Calendar: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>,
@@ -53,10 +54,7 @@ const HighlightCards = ({ highlights = [] }) => { // Accept highlights prop
       
       <div className="cards-grid">
         {defaultHighlights.map((highlight) => (
-          <div 
-            key={highlight.id} 
-            className={`highlight-card ${highlight.color} ${highlight.importance}`}
-          >
+          <div key={highlight.id} className={`highlight-card ${highlight.color || 'blue'} ${highlight.importance || 'medium'}`}>
             <div className="card-icon-wrapper">
               {renderIcon(highlight.icon)}
             </div>
@@ -64,6 +62,7 @@ const HighlightCards = ({ highlights = [] }) => { // Accept highlights prop
               <h3 className="card-title">{highlight.title}</h3>
               <p className="card-details">{highlight.details}</p>
               <p className="card-sub-details">{highlight.subDetails}</p>
+              <p className="card-date">{highlight.date}</p>
             </div>
             {highlight.importance === 'high' && (
               <div className="importance-badge">High Priority</div>

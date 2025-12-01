@@ -132,6 +132,15 @@ async getMetrics(period = '30-days') {
     return data;
   },
 
+  async getAllEvents(days = 60) {
+  const { data } = await api.get('/api/dashboard/events', {
+    params: { 
+      days: days,
+      exclude_keywords: 'SKY CLUB,SUITES,UPCHARGE,CLUB SEATS'
+    }
+  });
+  return data;
+},
   async getSalesPrediction(itemId, targetDate = null, itemName = "Unknown", category = "Entrees") {
     const params = {
       item_id: itemId,

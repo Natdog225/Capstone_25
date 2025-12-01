@@ -122,3 +122,20 @@
     grid-template-columns: 1fr;
   }
 }
+
+.card-date {
+  font-size: 13px;
+  color: #666;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.highlight-card.red {
+  border-left-color: #f44336;
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.05) 0%, transparent 100%);
+}
+
+.highlight-card.red .card-icon-wrapper {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
