@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, History, Users, ArrowRight, X } from 'lucide-react';
 import { dinemetraAPI } from '../../services/dinemetraService.js';
 import './CSS/Infosections.css';
+import HistoricalComparison from './HistoricalComparison.jsx';
 
-// Import weather icons from react-icons (correct path)
+// Import weather icons
 import { 
   WiDaySunny, 
   WiCloud, 
@@ -67,7 +68,6 @@ const InfoSections = () => {
   // Load 60-day events when button clicked
   const handleViewAllEvents = async () => {
     try {
-      // You'll need to add this endpoint to your service
       const events = await dinemetraAPI.getAllEvents(60);
       setAllEvents(events);
       setShowAllEvents(true);
@@ -165,7 +165,7 @@ const InfoSections = () => {
           </button>
         </div>
 
-        {/* Weather Impact with react-icons */}
+        {/* Weather Impact */}
         <div className="info-card card">
           <div className="info-header">
             <div className="weather-icon-wrapper">
@@ -189,27 +189,8 @@ const InfoSections = () => {
           </div>
         </div>
 
-        {/* Historical Data */}
-        <div className="info-card card">
-          <div className="info-header">
-            <History size={20} className="info-icon history" />
-            <h3 className="info-title">Historical Comparison</h3>
-          </div>
-          <div className="historical-stats">
-            <div className="stat-row">
-              <span className="stat-label">Same Week Last Year</span>
-              <span className="stat-value">{historical.lastYear}</span>
-            </div>
-            <div className="stat-row">
-              <span className="stat-label">4-Week Average</span>
-              <span className="stat-value">{historical.average}</span>
-            </div>
-            <div className="stat-row current">
-              <span className="stat-label">This Week Projection</span>
-              <span className="stat-value highlight">{historical.projection}</span>
-            </div>
-          </div>
-        </div>
+        {/* Historical Comparison - NEW SEPARATE COMPONENT */}
+        <HistoricalComparison historical={historical} />
 
         {/* Labor Prediction */}
         <div className="info-card card labor-card">
@@ -248,7 +229,7 @@ const InfoSections = () => {
         <div className="modal-overlay" onClick={() => setShowAllEvents(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Upcoming Events</h2>
+              <h2>Upcoming Events (Next 60 Days)</h2>
               <button className="modal-close" onClick={() => setShowAllEvents(false)}>
                 <X size={24} />
               </button>

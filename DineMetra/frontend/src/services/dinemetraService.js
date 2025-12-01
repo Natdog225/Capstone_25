@@ -125,6 +125,47 @@ async getMetrics(period = '30-days') {
     return data;
   },
 
+  // ===== HISTORICAL COMPARISON ENDPOINTS =====
+async compareWaitTimes(date = null) {
+  const { data } = await api.get('/api/historical/compare/wait-times', {
+    params: { date }
+  });
+  return data;
+},
+
+async compareSales(date = null) {
+  const { data } = await api.get('/api/historical/compare/sales', {
+    params: { date }
+  });
+  return data;
+},
+
+async compareBusyness(date = null) {
+  const { data } = await api.get('/api/historical/compare/busyness', {
+    params: { date }
+  });
+  return data;
+},
+
+async compareAllHistorical(date = null) {
+  const { data } = await api.get('/api/historical/compare/all', {
+    params: { date }
+  });
+  return data;
+},
+
+async getWeeklyTrends(weeks = 4) {
+  const { data } = await api.get('/api/historical/trends/weekly', {
+    params: { weeks }
+  });
+  return data;
+},
+
+async getHistoricalSummary() {
+  const { data } = await api.get('/api/historical/summary');
+  return data;
+},
+
   // ===== DASHBOARD PREDICTIONS (GET versions) =====
   async getBusynessPrediction(timestamp = null) {
     const params = timestamp ? { timestamp } : {};
