@@ -1,36 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Cloud, History, Users, ArrowRight } from 'lucide-react';
+import { dinemetraAPI } from '../../services/dinemetraService.js';
 import './CSS/Infosections.css';
 
-const InfoSections = ({ infoData = {} }) => {
-  const defaultData = {
-    events: [
-      { date: 'Nov 28', event: 'Thanksgiving Special Menu', bookings: '85%' },
-      { date: 'Dec 5', event: 'Wine Tasting Event', bookings: '60%' },
-      { date: 'Dec 15', event: 'Holiday Party - Private', bookings: 'Confirmed' },
-    ],
-    weather: {
-      current: 'Clear skies expected',
-      forecast: 'Weekend: 30% rain chance',
-      impact: 'Moderate patio seating impact'
-    },
-    labor: {
-      predicted: 32,
-      planned: 30,
-      variance: '+2',
-      recommendation: 'Consider adding 1 server for Saturday peak'
-    },
-    historical: {
-      lastYear: '$42,500',
-      average: '$38,750',
-      projection: '$41,200'
-    }
-  };
 
-  const upcomingEvents = infoData.events || defaultData.events;
-  const weatherImpact = infoData.weather || defaultData.weather;
-  const laborPrediction = infoData.labor || defaultData.labor;
-  const historicalData = infoData.historical || defaultData.historical;
+const InfoSections = () => {
+  const [infoData, setInfoData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchInfoSections = async () => {
+      try {
+        setLoading(true);
+        const data = await dinemetraAPI.getInfoSections();
+        setInfoData(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load info sections:', err);
+        setError('Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInfoSections();
+  }, []);
+
+
+  if (loading) {
+    return (
+      <div className="info-sections">
+        <div className="info-grid">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="info-card card loading">
+              <div className="loading-spinner">Loading...</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !infoData) {
+    return (
+      <div className="info-sections">
+        <div className="error-message">
+          <p>⚠️ {error || 'Failed to load information'}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Directly use the API data structure - no more mock fallbacks
+  const { events, weather, labor, historical } = infoData;
 
   return (
     <div className="info-sections">
@@ -42,7 +66,7 @@ const InfoSections = ({ infoData = {} }) => {
             <h3 className="info-title">Upcoming Events</h3>
           </div>
           <div className="events-list">
-            {upcomingEvents.map((event, index) => (
+            {events?.map((event, index) => (
               <div key={index} className="event-item">
                 <div className="event-date">{event.date}</div>
                 <div className="event-details">
@@ -69,15 +93,15 @@ const InfoSections = ({ infoData = {} }) => {
           <div className="weather-content">
             <div className="weather-item">
               <span className="weather-label">Current</span>
-              <span className="weather-value">{weatherImpact.current}</span>
+              <span className="weather-value">{weather.current}</span>
             </div>
             <div className="weather-item">
               <span className="weather-label">Forecast</span>
-              <span className="weather-value">{weatherImpact.forecast}</span>
+              <span className="weather-value">{weather.forecast}</span>
             </div>
             <div className="weather-impact-box">
               <span className="impact-label">Expected Impact</span>
-              <span className="impact-value">{weatherImpact.impact}</span>
+              <span className="impact-value">{weather.impact}</span>
             </div>
           </div>
         </div>
@@ -91,15 +115,15 @@ const InfoSections = ({ infoData = {} }) => {
           <div className="historical-stats">
             <div className="stat-row">
               <span className="stat-label">Same Week Last Year</span>
-              <span className="stat-value">{historicalData.lastYear}</span>
+              <span className="stat-value">{historical.lastYear}</span>
             </div>
             <div className="stat-row">
               <span className="stat-label">4-Week Average</span>
-              <span className="stat-value">{historicalData.average}</span>
+              <span className="stat-value">{historical.average}</span>
             </div>
             <div className="stat-row current">
               <span className="stat-label">This Week Projection</span>
-              <span className="stat-value highlight">{historicalData.projection}</span>
+              <span className="stat-value highlight">{historical.projection}</span>
             </div>
           </div>
         </div>
@@ -114,23 +138,23 @@ const InfoSections = ({ infoData = {} }) => {
             <div className="labor-metrics">
               <div className="labor-metric">
                 <span className="metric-label">Predicted</span>
-                <span className="metric-value">{laborPrediction.predicted}</span>
+                <span className="metric-value">{labor.predicted}</span>
                 <span className="metric-unit">staff</span>
               </div>
               <div className="labor-metric">
                 <span className="metric-label">Planned</span>
-                <span className="metric-value">{laborPrediction.planned}</span>
+                <span className="metric-value">{labor.planned}</span>
                 <span className="metric-unit">staff</span>
               </div>
               <div className="labor-metric variance">
                 <span className="metric-label">Variance</span>
-                <span className="metric-value">{laborPrediction.variance}</span>
+                <span className="metric-value">{labor.variance}</span>
                 <span className="metric-unit">staff</span>
               </div>
             </div>
             <div className="recommendation-box">
               <span className="recommendation-label">AI Recommendation</span>
-              <p className="recommendation-text">{laborPrediction.recommendation}</p>
+              <p className="recommendation-text">{labor.recommendation}</p>
             </div>
           </div>
         </div>

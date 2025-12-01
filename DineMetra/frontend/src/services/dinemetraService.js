@@ -1,18 +1,161 @@
 import api from './api';
 
+// TypeScript-style JSDoc for type safety (optional but recommended)
+
+/**
+ * @typedef {Object} Highlight
+ * @property {number} id
+ * @property {string} title
+ * @property {string} icon
+ * @property {string} color
+ * @property {string} details
+ * @property {string} subDetails
+ * @property {'high'|'medium'|'low'} importance
+ */
+
+/**
+ * @typedef {Object} SalesChartData
+ * @property {string} day
+ * @property {number} thisWeek
+ * @property {number} pastData
+ * @property {number} actual
+ */
+
+/**
+ * @typedef {Object} DashboardData
+ * @property {Highlight[]} highlights
+ * @property {SalesChartData[]} chartData
+ * @property {Object} metrics
+ * @property {Object} infoData
+ * @property {Object} userProfile
+ */
+
 export const dinemetraAPI = {
-  // Health check
+  // ===== HEALTH & MONITORING =====
   async healthCheck() {
-    try {
-      const { data } = await api.get('/');
-      return data;
-    } catch (error) {
-      console.warn('API health check failed:', error.message);
-      return null;
-    }
+    const { data } = await api.get('/');
+    return data;
   },
 
-  // Predict wait time
+  async dashboardHealth() {
+    const { data } = await api.get('/api/dashboard/health');
+    return data;
+  },
+
+  async getModelPerformance() {
+    const { data } = await api.get('/api/monitoring/model-performance');
+    return data;
+  },
+
+  async getDataHealth() {
+    const { data } = await api.get('/api/monitoring/data-health');
+    return data;
+  },
+
+  // ===== DASHBOARD DATA (RECOMMENDED: Use single endpoint) =====
+  async getCompleteDashboard() {
+    const { data } = await api.get('/api/dashboard/dashboard');
+    return data;
+  },
+
+  // ===== OR: Granular dashboard endpoints =====
+  async getHighlights() {
+    const { data } = await api.get('/api/dashboard/highlights');
+    return data;
+  },
+
+    async getSalesChart(week = 'this-week') {
+        const response = await api.get('/api/dashboard/sales-chart', {
+        params: { week }
+        });
+        // If API returns { data: [...] }, extract it
+        return response.data.data || response.data;
+    },
+
+
+  async getMetrics() {
+    const { data } = await api.get('/api/dashboard/metrics');
+    return data;
+  },
+
+  async getInfoSections() {
+    const { data } = await api.get('/api/dashboard/info-sections');
+    return data;
+  },
+
+  async getUserProfile() {
+    const { data } = await api.get('/api/dashboard/user-profile');
+    return data;
+  },
+
+  // ===== PREDICTIONS (ENHANCED - RECOMMENDED) =====
+  async predictWaitTimeEnhanced(partySize, timestamp = null, currentOccupancy = 50, testWeather = null) {
+    const requestBody = {
+      party_size: partySize,
+      current_occupancy: currentOccupancy,
+      timestamp: timestamp || new Date().toISOString(),
+      test_weather_condition: testWeather
+    };
+    
+    const { data } = await api.post('/api/predictions/wait-time-enhanced', requestBody);
+    return data;
+  },
+
+  async predictBusynessEnhanced(timestamp = null, weather = null) {
+    const requestBody = {
+      timestamp: timestamp || new Date().toISOString(),
+      weather_condition: weather
+    };
+    
+    const { data } = await api.post('/api/predictions/busyness-enhanced', requestBody);
+    return data;
+  },
+
+  async predictSalesEnhanced(itemId, date = null, itemName = "Unknown", category = "Entrees") {
+    const requestBody = {
+      item_id: itemId,
+      date: date || new Date().toISOString(),
+      item_name: itemName,
+      category: category
+    };
+    
+    const { data } = await api.post('/api/predictions/sales-enhanced', requestBody);
+    return data;
+  },
+
+  // ===== DASHBOARD PREDICTIONS (GET versions) =====
+  async getBusynessPrediction(timestamp = null) {
+    const params = timestamp ? { timestamp } : {};
+    const { data } = await api.get('/api/dashboard/predictions/busyness-enhanced', { params });
+    return data;
+  },
+
+  async getSalesPrediction(itemId, targetDate = null, itemName = "Unknown", category = "Entrees") {
+    const params = {
+      item_id: itemId,
+      item_name: itemName,
+      category: category
+    };
+    if (targetDate) params.target_date = targetDate;
+    
+    const { data } = await api.get('/api/dashboard/predictions/sales-enhanced', { params });
+    return data;
+  },
+
+  // ===== FEEDBACK =====
+  async submitFeedback(predictionType, predictionId, actualValue, notes = null) {
+    const params = {
+      prediction_type: predictionType,
+      prediction_id: predictionId,
+      actual_value: actualValue,
+    };
+    if (notes) params.notes = notes;
+    
+    const { data } = await api.get('/api/dashboard/feedback', { params });
+    return data;
+  },
+
+  // ===== LEGACY (Original predictions - kept for backward compatibility) =====
   async predictWaitTime(partySize, timestamp = null, currentOccupancy = 50) {
     const requestBody = {
       party_size: partySize,
@@ -24,7 +167,6 @@ export const dinemetraAPI = {
     return data;
   },
 
-  // Predict busyness (Slow, Moderate, Peak)
   async predictBusyness(timestamp = null, weatherCondition = null) {
     const requestBody = {
       timestamp: timestamp || new Date().toISOString(),
@@ -35,7 +177,6 @@ export const dinemetraAPI = {
     return data;
   },
 
-  // Predict sales for specific menu items
   async predictSales(itemId, date = null, itemName = "Unknown", category = "Entrees") {
     const requestBody = {
       item_id: itemId,
