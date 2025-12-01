@@ -1,6 +1,7 @@
 #have to ignore fastapi due to merge conflicts
 .env.local
 DineMetra/database/fastapi-env/
+node_modules
 
 
 # Byte-compiled / optimized / DLL files
