@@ -224,9 +224,7 @@ yarn.lock
 pnpm-lock.yaml
 
 #json files
-*.json
-*.tsv
-*.csv
+
 
 
 
