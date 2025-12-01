@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Dinemetra API",
     description="Backend for Restaurant Prediction System",
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan,  # <--- Register the lifespan handler here
 )
 
