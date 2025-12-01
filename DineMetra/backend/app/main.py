@@ -8,6 +8,7 @@ from app.api import predictions
 
 # Import the model loader
 from app.services.ml_service import initialize_models
+from app.api import websocket
 
 #Dashboard stuff
 from app.api import predictions, dashboard, monitoring
@@ -56,6 +57,7 @@ app.add_middleware(
 app.include_router(predictions.router, prefix="/api/predictions", tags=["Predictions"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(monitoring.router, prefix="/api/monitoring", tags=["monitoring"])
+app.include_router(websocket.router)
 
 
 # --- HEALTH CHECK ---
