@@ -119,19 +119,55 @@ class ModelTrainer:
         logger.info("⏱️  Training Wait Time Prediction Model")
         logger.info("-" * 60)
 
-        # --- FIX 1: Load the ENRICHED data from disk if possible ---
+        # --- FIXED: Load wait times and merge weather from orders ---
+        df = None
+        
+        # Try wait_times file first
         try:
             df = pd.read_csv("data/processed/wait_times_from_real_data.csv")
-            # Check if weather is actually there
-            if "weather_condition" not in df.columns:
-                raise ValueError("No weather data")
-            logger.info("✓ Loaded enriched wait time data with weather history")
-        except Exception as e:
-            logger.warning(f"⚠️ Could not load enriched data: {e}")
-            logger.warning(
-                "⚠️ Falling back to standard data (Weather features will be empty!)"
-            )
+            if "weather_condition" in df.columns and df["weather_condition"].nunique() > 1:
+                logger.info("✓ Loaded enriched wait time data with weather history")
+            else:
+                df = None
+        except:
+            pass
+        
+        # If that didn't work, use standard wait_times and merge weather from orders
+        if df is None:
+            logger.info("⚠️ Loading wait times, will merge weather from orders...")
             df = data["wait_times"].copy()
+            
+            # Try to merge weather from orders_from_real_data.csv
+            try:
+                orders_with_weather = pd.read_csv("data/processed/orders_from_real_data.csv")
+                if "weather_condition" in orders_with_weather.columns:
+                    # Prepare both dataframes for merge
+                    time_col = "log_timestamp" if "log_timestamp" in df.columns else "timestamp_quoted"
+                    df[time_col] = pd.to_datetime(df[time_col])
+                    df['date'] = df[time_col].dt.date
+                    
+                    orders_with_weather['order_timestamp'] = pd.to_datetime(orders_with_weather['order_timestamp'])
+                    orders_with_weather['date'] = orders_with_weather['order_timestamp'].dt.date
+                    
+                    # Get unique weather per date
+                    weather_by_date = orders_with_weather.groupby('date')['weather_condition'].first().reset_index()
+                    
+                    # Merge
+                    df = df.merge(weather_by_date, on='date', how='left')
+                    df['weather_condition'] = df['weather_condition'].fillna('sunny')
+                    
+                    unique_conditions = df['weather_condition'].nunique()
+                    logger.info(f"✓ Merged weather from orders ({unique_conditions} different conditions)")
+                    
+                    # Show distribution
+                    weather_dist = df['weather_condition'].value_counts()
+                    logger.info(f"   Weather distribution: {dict(weather_dist)}")
+                else:
+                    logger.warning("⚠️ No weather in orders file")
+                    df['weather_condition'] = 'sunny'
+            except Exception as e:
+                logger.warning(f"⚠️ Could not merge weather: {e}")
+                df['weather_condition'] = 'sunny'
 
         # Remove records with missing actual wait times
         df = df[df["actual_wait_minutes"].notna()]
