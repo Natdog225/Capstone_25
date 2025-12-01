@@ -411,11 +411,11 @@ factor_date,day_of_week,is_holiday,holiday_name,weather_condition,temperature_hi
 2025-11-14,4,False,,rainy,73.6,50.4,0.59,,,,
 2025-11-15,5,False,,rainy,63.4,55.3,0.0,,,,
 2025-11-16,6,False,,sunny,77.5,55.7,0.02,,,,
-2025-11-26,2,False,,sunny,50.0,33.0,0.01,,,,
-2025-11-27,3,False,,sunny,53.0,33.0,0.0,,,,
-2025-11-28,4,False,,sunny,52.0,43.0,0.025,,,,
-2025-11-29,5,False,,rainy,53.0,28.0,0.39,Tulsa Golden Hurricane Football vs. UAB Blazers Football,sports,20000.0,2.730721658305747
-2025-11-30,6,False,,sunny,37.0,26.0,0.03,"PAW Patrol Live! ""A Mighty Adventure""",other,15000.0,0.4410465189408412
-2025-12-01,0,False,,rainy,36.0,26.0,0.09,,,,
-2025-12-02,1,False,,sunny,43.0,29.0,0.05,,,,
-2025-12-03,2,False,,unknown,70.0,50.0,0.0,,,,
+2025-12-01,0,False,,snowy,36.0,24.0,0.1,,,,
+2025-12-02,1,False,,sunny,48.0,32.0,0.0,,,,
+2025-12-03,2,False,,sunny,50.0,23.0,0.005,Trans-Siberian Orchestra - The Ghosts Of Christmas Eve,concert,15000.0,0.4410465189408412
+2025-12-04,3,False,,sunny,35.0,24.0,0.025,Keller Williams,concert,1000.0,0.3483307045550841
+2025-12-05,4,False,,sunny,49.0,30.0,0.02,Tulsa Oilers Vs Wichita Thunder - Game 9,sports,15000.0,0.4410465189408412
+2025-12-06,5,False,,sunny,54.0,32.0,0.0,Avatar,concert,1000.0,0.3765698226643657
+2025-12-07,6,False,,sunny,46.0,27.0,0.005,Tulsa Oilers Vs Kansas City Mavericks - Game 10,sports,15000.0,0.4410465189408412
+2025-12-08,0,False,,unknown,70.0,50.0,0.0,,,,
