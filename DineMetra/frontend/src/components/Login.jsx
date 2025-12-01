@@ -6,7 +6,8 @@ import {
   signInWithPopup 
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
-import './Login.css'; // Import the CSS file
+import { getAuth } from 'firebase/auth';
+
 
 const DineMetraAuth = () => {
   const navigate = useNavigate();
