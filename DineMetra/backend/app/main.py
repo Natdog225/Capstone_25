@@ -9,6 +9,7 @@ from app.api import predictions
 # Import the model loader
 from app.services.ml_service import initialize_models
 from app.api import websocket
+from app.api import historical
 
 #Dashboard stuff
 from app.api import predictions, dashboard, monitoring
@@ -58,6 +59,7 @@ app.include_router(predictions.router, prefix="/api/predictions", tags=["Predict
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(monitoring.router, prefix="/api/monitoring", tags=["monitoring"])
 app.include_router(websocket.router)
+app.include_router(historical.router)
 
 
 # --- HEALTH CHECK ---
