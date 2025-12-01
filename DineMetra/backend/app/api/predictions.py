@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
-# Import ALL service wrappers (your existing code)
+# Import ALL service wrappers
 from app.services.ml_service import (
     predict_wait_time,
     predict_busyness,
@@ -141,7 +141,6 @@ async def predict_wait_time_enhanced_endpoint(request: WaitTimeRequest):
       * Historical comparison
     - Human-readable explanation
 
-    This is the recommended endpoint for dashboard displays!
     """
     try:
         timestamp = request.timestamp or datetime.now()
@@ -177,7 +176,6 @@ async def predict_busyness_enhanced_endpoint(request: BusynessRequest):
       * Historical comparison
     - Staffing recommendation
 
-    This is the recommended endpoint for dashboard displays!
     """
     try:
         target_time = request.timestamp or datetime.now()
@@ -210,7 +208,6 @@ async def predict_sales_enhanced_endpoint(request: SalesRequest):
       * Historical trends
     - Purchasing recommendation
 
-    This is the recommended endpoint for inventory planning!
     """
     try:
         target_date = request.date or datetime.now()
