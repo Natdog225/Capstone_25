@@ -103,7 +103,7 @@ class EventService:
         return self.fetch_ticketmaster_events(date_obj, date_obj + timedelta(days=1))
 
     # ========================================
-    # INTERNAL IMPACT LOGIC (Your original code)
+    # INTERNAL IMPACT LOGIC
     # ========================================
 
     def _calculate_single_event_impact(
@@ -225,7 +225,6 @@ class EventService:
             return []
 
     def _process_ticketmaster_event(self, event: Dict) -> Optional[Dict]:
-        # Your existing processing logic...
         try:
             name = event.get("name", "Unknown")
             dates = event.get("dates", {})
@@ -315,6 +314,6 @@ if __name__ == "__main__":
     svc = EventService()
     print("Fetching...")
     events = svc.fetch_ticketmaster_events(
-        datetime.now(), datetime.now() + timedelta(days=7)
+        datetime.now(), datetime.now() + timedelta(days=60)
     )
     print(f"Found {len(events)} events")
