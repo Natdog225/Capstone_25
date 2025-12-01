@@ -73,10 +73,12 @@ export const dinemetraAPI = {
     },
 
 
-  async getMetrics() {
-    const { data } = await api.get('/api/dashboard/metrics');
-    return data;
-  },
+async getMetrics(period = '30-days') {
+  const response = await api.get('/api/dashboard/metrics', {
+    params: { period }
+  });
+  return response.data.data || response.data;
+},
 
   async getInfoSections() {
     const { data } = await api.get('/api/dashboard/info-sections');

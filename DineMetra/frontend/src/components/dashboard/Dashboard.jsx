@@ -14,31 +14,34 @@ import './CSS/Dashboard.css';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [selectedWeek, setSelectedWeek] = useState('this-week');
+  const [periodRange, setPeriodRange] = useState('30-days');
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiStatus, setApiStatus] = useState('connecting');
 
-  // Load ALL dashboard data in ONE call
   useEffect(() => {
     const loadDashboard = async () => {
       try {
+        setLoading(true);
+        
+        // Fetch all dashboard data in parallel
         const [completeData, userProfile] = await Promise.all([
           dinemetraAPI.getCompleteDashboard(),
           dinemetraAPI.getUserProfile()
         ]);
         
         setDashboardData({
-          highlights: completeData.highlights,
-          chartData: completeData.chartData,
-          metrics: completeData.metrics,
-          infoData: completeData.infoData,
+          highlights: completeData.highlights || [],
+          chartData: completeData.chartData || [],
+          metrics: completeData.metrics || {},
+          infoData: completeData.infoData || {},
           userProfile: userProfile
         });
+        
         setApiStatus('connected');
       } catch (error) {
         console.error('Failed to load dashboard:', error);
         setApiStatus('failed');
-        // Use mock data or show error
       } finally {
         setLoading(false);
       }
@@ -49,6 +52,10 @@ const Dashboard = () => {
 
   const handleWeekChange = (week) => {
     setSelectedWeek(week);
+  };
+
+  const handlePeriodChange = (period) => {
+    setPeriodRange(period);
   };
 
   const handleLogout = async () => {
@@ -62,11 +69,29 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return <div className="loading-screen">Loading your restaurant insights...</div>;
+    return (
+      <div className="dashboard-container">
+        <div className="loading-screen">
+          <h1>Loading Dashboard...</h1>
+          <p>Fetching your restaurant insights</p>
+          <div className="loading-spinner"></div>
+        </div>
+      </div>
+    );
   }
 
-  if (!dashboardData) {
-    return <div className="error-screen">Failed to load dashboard data</div>;
+  if (apiStatus === 'failed' || !dashboardData) {
+    return (
+      <div className="dashboard-container">
+        <div className="error-screen">
+          <h2>⚠️ Unable to Load Dashboard</h2>
+          <p>The API is currently unavailable. Please check your connection or try again later.</p>
+          <button onClick={() => window.location.reload()} className="retry-btn">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -82,7 +107,10 @@ const Dashboard = () => {
         <main className="dashboard-main">
           <HighlightCards highlights={dashboardData.highlights} />
           <ChartSection weekRange={selectedWeek} />
-          <MetricsGrid metrics={dashboardData.metrics} />
+          <MetricsGrid 
+            periodRange={periodRange} 
+            onPeriodChange={handlePeriodChange}
+          />
           <PredictionsPanel />
           <InfoSections infoData={dashboardData.infoData} />
         </main>
@@ -90,6 +118,11 @@ const Dashboard = () => {
         <footer className="dashboard-footer">
           <p>Restaurant Dashboard © 2024 | Last updated: {new Date().toLocaleTimeString()}</p>
         </footer>
+        
+        {/* Optional: API status indicator */}
+        <div className={`api-status ${apiStatus}`}>
+          {apiStatus === 'connected' ? '✅ API Connected' : '❌ API Offline'}
+        </div>
       </div>
     </div>
   );

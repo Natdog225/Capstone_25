@@ -5,12 +5,12 @@ import {
   Beer, 
   Users, 
   TrendingUp,
-  DollarSign
+  DollarSign,
+  Calendar
 } from 'lucide-react';
 import { dinemetraAPI } from '../../services/dinemetraService';
 import './CSS/Metricsgrid.css';
 
-// Map string icon names to actual components
 const iconMap = {
   ShoppingCart: ShoppingCart,
   Wine: Wine,
@@ -20,7 +20,15 @@ const iconMap = {
   DollarSign: DollarSign
 };
 
-const MetricsGrid = () => {
+const periodOptions = [
+  { value: '7-days', label: 'Last 7 Days' },
+  { value: '30-days', label: 'Last 30 Days' },
+  { value: '90-days', label: 'Last 90 Days' },
+  { value: 'this-month', label: 'This Month' },
+  { value: 'last-month', label: 'Last Month' }
+];
+
+const MetricsGrid = ({ periodRange = '30-days', onPeriodChange }) => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +37,7 @@ const MetricsGrid = () => {
     const fetchMetrics = async () => {
       try {
         setLoading(true);
-        const data = await dinemetraAPI.getMetrics();
+        const data = await dinemetraAPI.getMetrics(periodRange);
         setMetrics(data);
         setError(null);
       } catch (err) {
@@ -41,15 +49,11 @@ const MetricsGrid = () => {
     };
 
     fetchMetrics();
-  }, []);
+  }, [periodRange]);
 
   if (loading) {
     return (
       <div className="metrics-section">
-        <div className="metrics-header">
-          <h2 className="section-title">30 Day Average</h2>
-          <span className="date-range">Loading...</span>
-        </div>
         <div className="loading-grid">
           {[1, 2, 3, 4, 5].map(i => (
             <div key={i} className="metric-card card loading">
@@ -72,15 +76,29 @@ const MetricsGrid = () => {
     );
   }
 
-  // API data structure:
-  // { categories: [...], summaries: [...], purchasing: [...] }
   const { categories = [], summaries = [], purchasing = [] } = metrics;
+
+  // Get current period label for display
+  const currentPeriodLabel = periodOptions.find(p => p.value === periodRange)?.label || 'Loading...';
 
   return (
     <div className="metrics-section">
       <div className="metrics-header">
-        <h2 className="section-title">30 Day Average</h2>
-        <span className="date-range">Nov 26 - Dec 25</span>
+        <h2 className="section-title">Sales Metrics</h2>
+        <div className="period-controls">
+          <Calendar size={16} className="calendar-icon" />
+          <select 
+            value={periodRange} 
+            onChange={(e) => onPeriodChange(e.target.value)}
+            className="period-selector"
+          >
+            {periodOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="metrics-grid">

@@ -10,6 +10,7 @@ const api = axios.create({
   },
 });
 
+
 // Add Firebase token to every request
 api.interceptors.request.use(
   async (config) => {
