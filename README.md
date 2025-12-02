@@ -10,10 +10,10 @@ psql -U your_username -d rushradar_db -f backend/database/schema.sql
 ## Flowchart
 ```mermaid
 flowchart TB
-        A(["Sales Data"]) --> E{"Database"}
-        B(["Weather Data"]) --> E{"Database"}
-        C(["Events Data"]) --> E{"Database"}
-        D(["Geolocation Data"]) --> E{"Database"}
+        A("Sales Data") --> E{"Database"}
+        B("Weather Data") --> E{"Database"}
+        C("Events Data") --> E{"Database"}
+        D("Geolocation Data") --> E{"Database"}
        
         E --> F["Prediction Engine/Scoring System"]
         F --> G["Database Table"]
