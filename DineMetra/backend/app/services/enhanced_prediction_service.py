@@ -222,7 +222,7 @@ class EnhancedPredictionService:
             event_data = self._get_event_details(target_date)
 
             # Determine if item is weather sensitive
-            weather_sensitive = self._is_weather_sensitive_item(category)
+            weather_sensitive = self._is_weather_sensitive_item(item_name, category)
 
             # Calculate margin of error
             margin_low = int(predicted_quantity * (1 - (1 - base_confidence) * 0.5))
@@ -429,10 +429,19 @@ class EnhancedPredictionService:
         else:  # Busy/Very Busy
             return "Ensure all stations are fully staffed"
 
-    def _is_weather_sensitive_item(self, category: str) -> bool:
-        """Determine if item category is weather sensitive"""
-        sensitive_categories = ["Beverages", "Salads", "Desserts"]
-        return category in sensitive_categories
+    def _is_weather_sensitive_item(self, item_name: str, category: str) -> bool:
+        """Check if item is weather sensitive"""
+        item_lower = item_name.lower()
+
+        # Hot weather items
+        if any(kw in item_lower for kw in ["fry", "fried", "salad", "spring roll"]):
+            return True
+
+        # Cold weather items
+        if any(kw in item_lower for kw in ["banh mi", "bowl", "soup"]):
+            return True
+
+        return False
 
     def _get_purchasing_recommendation(
         self, predicted: int, margin_high: int, category: str
