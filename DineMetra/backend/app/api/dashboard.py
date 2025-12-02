@@ -15,7 +15,7 @@ from app.services.weather_service import WeatherService
 from app.services.enhanced_prediction_service import enhanced_prediction_service
 from app.services.dashboard_service import dashboard_service
 
-router = APIRouter()
+router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
 # Initialize services
 event_service = EventService()

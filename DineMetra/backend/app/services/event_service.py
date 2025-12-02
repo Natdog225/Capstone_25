@@ -34,7 +34,7 @@ class EventService:
         }
 
         # Search parameters
-        self.search_radius_miles = float(os.getenv("EVENT_SEARCH_RADIUS", "5"))
+        self.search_radius_miles = float(os.getenv("EVENT_SEARCH_RADIUS", "8"))
 
         # API keys
         self.ticketmaster_key = os.getenv("TICKETMASTER_API_KEY")
