@@ -28,7 +28,7 @@ class DashboardService:
         try:
             today = datetime.now()
             
-            # Get major events this week from YOUR event service
+            # Get major events this week from event service
             events = self.event_service.fetch_ticketmaster_events(
                 today, 
                 today + timedelta(days=7)
@@ -488,3 +488,7 @@ class DashboardService:
 
 # Create singleton instance
 dashboard_service = DashboardService()
+
+def get_dashboard_service() -> DashboardService:  #
+    """Get the singleton dashboard service instance"""
+    return dashboard_service
