@@ -38,17 +38,12 @@ export const dinemetraAPI = {
   },
 
   async dashboardHealth() {
-    const { data } = await api.get('/api/dashboard/health');
+    const { data } = await api.get('/health');
     return data;
   },
 
   async getModelPerformance() {
-    const { data } = await api.get('/api/monitoring/model-performance');
-    return data;
-  },
-
-  async getDataHealth() {
-    const { data } = await api.get('/api/monitoring/data-health');
+    const { data } = await api.get('/health');
     return data;
   },
 
@@ -64,18 +59,18 @@ export const dinemetraAPI = {
     return data;
   },
 
-    async getSalesChart(week = 'this-week') {
+    async getSalesChart(startDate, endDate) {
         const response = await api.get('/api/dashboard/sales-chart', {
-        params: { week }
+        params: { start_date: startDate, end_date: endDate }
         });
         // If API returns { data: [...] }, extract it
         return response.data.data || response.data;
     },
 
 
-async getMetrics(period = '30-days') {
+async getMetrics(startDate, endDate) {
   const response = await api.get('/api/dashboard/metrics', {
-    params: { period }
+    params: { start_date: startDate, end_date: endDate }
   });
   return response.data.data || response.data;
 },

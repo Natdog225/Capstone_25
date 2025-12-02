@@ -1,3 +1,5 @@
+/* Chartsection.css - Dark Theme Unified */
+
 .chart-section {
   margin-bottom: 24px;
   animation: fadeIn 0.6s ease-out;
@@ -20,8 +22,9 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
+  border: 1px solid rgba(255, 185, 23, 0.1);
 }
 
 .stat-icon {
@@ -30,28 +33,29 @@
 }
 
 .stat-icon.up {
-  color: #4CAF50;
+  color: #28a745;
 }
 
 .stat-icon.down {
-  color: #f44336;
+  color: #dc3545;
 }
 
 .stat-value {
   font-weight: 600;
   font-size: 14px;
+  color: #ffffff;
 }
 
 .stat-value.up {
-  color: #4CAF50;
+  color: #28a745;
 }
 
 .stat-value.down {
-  color: #f44336;
+  color: #dc3545;
 }
 
 .stat-label {
-  color: var(--gray-dark);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 13px;
   margin-left: 4px;
 }
@@ -61,9 +65,10 @@
   gap: 24px;
   margin-bottom: 20px;
   padding: 12px;
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
   justify-content: center;
+  border: 1px solid rgba(255, 185, 23, 0.1);
 }
 
 .legend-item {
@@ -71,33 +76,36 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: var(--dark-bg);
+  color: #ffffff;
 }
 
 .legend-color {
   width: 12px;
   height: 12px;
   border-radius: 3px;
+  border: 1px solid rgba(255, 185, 23, 0.3);
 }
 
 .custom-tooltip {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(30, 30, 30, 0.95);
   backdrop-filter: blur(10px);
   padding: 12px;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 185, 23, 0.2);
+  color: #ffffff;
 }
 
 .tooltip-label {
   font-weight: 600;
   margin-bottom: 8px;
-  color: var(--dark-bg);
+  color: #ffb917;
 }
 
 .custom-tooltip p {
   margin: 4px 0;
   font-size: 13px;
+  color: #ffffff;
 }
 
 @media (max-width: 768px) {

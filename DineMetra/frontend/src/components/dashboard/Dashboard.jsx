@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Wine, Beer, Users, TrendingUp } from 'lucide-react';import Header from './Header';
+import Header from './Header';
 import ChartSection from './Chartsection';
 import HighlightCards from './Highlightcards';
 import MetricsGrid from './Metricsgrid';
 import InfoSections from './Infosections';
 import PredictionsPanel from '../PredictionsPanel';
+import ApiStatus from './ApiStatus'; // Add this import
 import { auth } from '../../firebase';
 import { signOut } from 'firebase/auth';
 import { dinemetraAPI } from '../../services/dinemetraService';
 import { useNavigate } from 'react-router-dom';
+import { XCircle } from 'lucide-react';
 import './CSS/Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [selectedWeek, setSelectedWeek] = useState('this-week');
-  const [periodRange, setPeriodRange] = useState('30-days');
+  
+  // Unified date range state
+  const today = new Date().toISOString().split('T')[0];
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  
+  const [dateRange, setDateRange] = useState({
+    startDate: thirtyDaysAgo,
+    endDate: today
+  });
+
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiStatus, setApiStatus] = useState('connecting');
@@ -50,12 +60,8 @@ const Dashboard = () => {
     loadDashboard();
   }, []);
 
-  const handleWeekChange = (week) => {
-    setSelectedWeek(week);
-  };
-
-  const handlePeriodChange = (period) => {
-    setPeriodRange(period);
+  const handleDateRangeChange = (newRange) => {
+    setDateRange(newRange);
   };
 
   const handleLogout = async () => {
@@ -83,12 +89,12 @@ const Dashboard = () => {
   if (apiStatus === 'failed' || !dashboardData) {
     return (
       <div className="dashboard-container">
-        <div className="error-screen">
-          <h2>⚠️ Unable to Load Dashboard</h2>
-          <p>The API is currently unavailable. Please check your connection or try again later.</p>
-          <button onClick={() => window.location.reload()} className="retry-btn">
-            Retry
-          </button>
+        <div className="api-status-widget error">
+          <XCircle size={24} className="status-icon error" />
+          <div>
+            <h3>API Connection Failed</h3>
+            <p>Unable to connect to the server. Please check your connection.</p>
+          </div>
         </div>
       </div>
     );
@@ -98,31 +104,24 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <div className="container">
         <Header 
-          selectedWeek={selectedWeek} 
-          onWeekChange={handleWeekChange}
+          dateRange={dateRange}
+          onDateRangeChange={handleDateRangeChange}
           onLogout={handleLogout}
-          userProfile={dashboardData.userProfile}
         />
         
         <main className="dashboard-main">
-          <HighlightCards highlights={dashboardData.highlights} />
-          <ChartSection weekRange={selectedWeek} />
-          <MetricsGrid 
-            periodRange={periodRange} 
-            onPeriodChange={handlePeriodChange}
-          />
+          <HighlightCards dateRange={dateRange} highlights={dashboardData.highlights} />
+          <ChartSection dateRange={dateRange} />
+          <MetricsGrid dateRange={dateRange} />
           <PredictionsPanel />
-          <InfoSections infoData={dashboardData.infoData} />
+          <InfoSections dateRange={dateRange} />
         </main>
         
         <footer className="dashboard-footer">
-          <p>Restaurant Dashboard © 2024 | Last updated: {new Date().toLocaleTimeString()}</p>
+          <p>Restaurant Dashboard © 2025 | Last updated: {new Date().toLocaleTimeString()}</p>
         </footer>
         
-        {/* Optional: API status indicator */}
-        <div className={`api-status ${apiStatus}`}>
-          {apiStatus === 'connected' ? '✅ API Connected' : '❌ API Offline'}
-        </div>
+        <ApiStatus />
       </div>
     </div>
   );

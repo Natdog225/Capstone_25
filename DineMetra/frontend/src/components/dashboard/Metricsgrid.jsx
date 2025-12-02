@@ -20,15 +20,7 @@ const iconMap = {
   DollarSign: DollarSign
 };
 
-const periodOptions = [
-  { value: '7-days', label: 'Last 7 Days' },
-  { value: '30-days', label: 'Last 30 Days' },
-  { value: '90-days', label: 'Last 90 Days' },
-  { value: 'this-month', label: 'This Month' },
-  { value: 'last-month', label: 'Last Month' }
-];
-
-const MetricsGrid = ({ periodRange = '30-days', onPeriodChange }) => {
+const MetricsGrid = ({ dateRange, onPeriodChange }) => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,7 +29,8 @@ const MetricsGrid = ({ periodRange = '30-days', onPeriodChange }) => {
     const fetchMetrics = async () => {
       try {
         setLoading(true);
-        const data = await dinemetraAPI.getMetrics(periodRange);
+        // Pass the date range to the API
+        const data = await dinemetraAPI.getMetrics(dateRange.startDate, dateRange.endDate);
         setMetrics(data);
         setError(null);
       } catch (err) {
@@ -49,7 +42,7 @@ const MetricsGrid = ({ periodRange = '30-days', onPeriodChange }) => {
     };
 
     fetchMetrics();
-  }, [periodRange]);
+  }, [dateRange]);
 
   if (loading) {
     return (
@@ -78,29 +71,11 @@ const MetricsGrid = ({ periodRange = '30-days', onPeriodChange }) => {
 
   const { categories = [], summaries = [], purchasing = [] } = metrics;
 
-  // Get current period label for display
-  const currentPeriodLabel = periodOptions.find(p => p.value === periodRange)?.label || 'Loading...';
-
   return (
     <div className="metrics-section">
-      <div className="metrics-header">
+        <div className="metrics-header">
         <h2 className="section-title">Sales Metrics</h2>
-        <div className="period-controls">
-          <Calendar size={16} className="calendar-icon" />
-          <select 
-            value={periodRange} 
-            onChange={(e) => onPeriodChange(e.target.value)}
-            className="period-selector"
-          >
-            {periodOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
         </div>
-      </div>
-
       <div className="metrics-grid">
         {(categories || []).map((metric) => {
           const IconComponent = iconMap[metric.icon] || ShoppingCart;

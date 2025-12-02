@@ -1,15 +1,55 @@
-import React from 'react';
-import { AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AlertCircle, Calendar } from 'lucide-react';
+import { dinemetraAPI } from '../../services/dinemetraService';
 import './CSS/Highlightcards.css';
 
-const HighlightCards = ({ highlights = [] }) => {
-  console.log('Raw highlights data:', highlights);
+const HighlightCards = ({ highlights: propHighlights = [] }) => {
+  const [highlights, setHighlights] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // If highlights come from props, use them
+    if (propHighlights && propHighlights.length > 0) {
+      console.log('✅ Highlights received from props:', propHighlights);
+      setHighlights(propHighlights);
+      setLoading(false);
+      return;
+    }
+
+    // Otherwise fetch directly
+    const fetchHighlights = async () => {
+      try {
+        setLoading(true);
+        console.log('🔄 Fetching highlights from API...');
+        const data = await dinemetraAPI.getHighlights();
+        console.log('📡 API response:', data);
+        
+        // Handle nested data structure
+        const highlightsData = data?.data || data || [];
+        setHighlights(highlightsData);
+        setError(null);
+      } catch (err) {
+        console.error('❌ Failed to load highlights:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHighlights();
+  }, [propHighlights]);
 
   // FILTER: Exclude items with specific keywords (case-insensitive)
   const excludedKeywords = ['SKY CLUB', 'SUITES', 'UPCHARGE', 'CLUB SEATS'];
   const filteredHighlights = highlights.filter(highlight => {
-    const searchableText = `${highlight.details} ${highlight.subDetails}`.toUpperCase();
-    return !excludedKeywords.some(keyword => searchableText.includes(keyword));
+    if (!highlight) return false;
+    const searchableText = `${highlight.details || ''} ${highlight.subDetails || ''}`.toUpperCase();
+    const shouldExclude = excludedKeywords.some(keyword => searchableText.includes(keyword));
+    if (shouldExclude) {
+      console.log('🚫 Filtered out highlight:', highlight.details);
+    }
+    return !shouldExclude;
   });
 
   // SORT: By importance (high → medium → low)
@@ -20,21 +60,44 @@ const HighlightCards = ({ highlights = [] }) => {
     return importanceOrder[aLevel] - importanceOrder[bLevel];
   });
 
-  console.log('Filtered & sorted highlights:', sortedHighlights);
+  console.log('📊 Final processed highlights:', sortedHighlights);
 
-  // Default mock data if API returns nothing
-  const defaultHighlights = sortedHighlights.length > 0 ? sortedHighlights : [
-    {
-      id: 1,
-      title: 'Big Event',
-      icon: 'Calendar',
-      color: 'blue',
-      details: 'Jazz Night - Saturday',
-      subDetails: 'Expected: 150+ guests',
-      date: '2025-12-07',
-      importance: 'high'
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="highlight-cards">
+        <div className="cards-grid">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="highlight-card loading">
+              <div className="loading-spinner">Loading highlights...</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="highlight-cards">
+        <div className="error-message">
+          <p>⚠️ Error loading highlights: {error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if no highlights
+  if (sortedHighlights.length === 0) {
+    return (
+      <div className="highlight-cards">
+        <div className="highlights-header">
+          <h2 className="section-title">This Week's Highlights</h2>
+          <AlertCircle size={18} className="info-icon" />
+        </div>
+        <p className="no-highlights">No highlights found for the selected date range.</p>
+      </div>
+    );
+  }
 
   const renderIcon = (iconName) => {
     const icons = {
@@ -42,7 +105,7 @@ const HighlightCards = ({ highlights = [] }) => {
       CloudRain: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path><line x1="16" y1="13" x2="16" y2="21"></line><line x1="8" y1="13" x2="8" y2="21"></line><line x1="12" y1="15" x2="12" y2="23"></line></svg>,
       Tag: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>,
     };
-    return icons[iconName] || null;
+    return icons[iconName] || <Calendar size={24} />;
   };
 
   return (
@@ -53,8 +116,11 @@ const HighlightCards = ({ highlights = [] }) => {
       </div>
       
       <div className="cards-grid">
-        {defaultHighlights.map((highlight) => (
-          <div key={highlight.id} className={`highlight-card ${highlight.color || 'blue'} ${highlight.importance || 'medium'}`}>
+        {sortedHighlights.map((highlight) => (
+          <div 
+            key={highlight.id || Math.random()} 
+            className={`highlight-card ${highlight.color || 'blue'} ${highlight.importance || 'medium'}`}
+          >
             <div className="card-icon-wrapper">
               {renderIcon(highlight.icon)}
             </div>

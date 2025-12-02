@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_URL || 'https://dinemetra-production.up.railway.app',
+        target: import.meta.env.VITE_API_URL || 'https://dinemetra-production.up.railway.app',
         changeOrigin: true,
         secure: true,
       }

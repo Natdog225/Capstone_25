@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, History, Users, ArrowRight, X } from 'lucide-react';
+import { Calendar, Users, ArrowRight, X } from 'lucide-react';
 import { dinemetraAPI } from '../../services/dinemetraService.js';
 import './CSS/Infosections.css';
 import HistoricalComparison from './HistoricalComparison.jsx';
@@ -16,7 +16,7 @@ import {
   WiStrongWind 
 } from 'react-icons/wi';
 
-const InfoSections = () => {
+const InfoSections = ({ dateRange }) => {
   const [infoData, setInfoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -62,8 +62,10 @@ const InfoSections = () => {
       }
     };
 
-    fetchInfoSections();
-  }, []);
+    if (dateRange?.startDate && dateRange?.endDate) {
+      fetchInfoSections();
+    }
+  }, [dateRange]);
 
   // Load 60-day events when button clicked
   const handleViewAllEvents = async () => {
@@ -132,10 +134,13 @@ const InfoSections = () => {
     );
   }
 
-  const { events, weather, labor, historical } = infoData;
+  const { events, weather, labor } = infoData;
 
   return (
     <div className="info-sections">
+      {/* Historical Comparison Component with dateRange */}
+      <HistoricalComparison dateRange={dateRange} />
+      
       <div className="info-grid">
         {/* Upcoming Events */}
         <div className="info-card card">
@@ -169,28 +174,25 @@ const InfoSections = () => {
         <div className="info-card card">
           <div className="info-header">
             <div className="weather-icon-wrapper">
-              {getWeatherIcon(weather.current, 32)}
+              {getWeatherIcon(weather?.current, 32)}
             </div>
             <h3 className="info-title">Weather Impact</h3>
           </div>
           <div className="weather-content">
             <div className="weather-item">
               <span className="weather-label">Current</span>
-              <span className="weather-value">{weather.current}</span>
+              <span className="weather-value">{weather?.current || 'N/A'}</span>
             </div>
             <div className="weather-item">
               <span className="weather-label">Forecast</span>
-              <span className="weather-value">{weather.forecast}</span>
+              <span className="weather-value">{weather?.forecast || 'N/A'}</span>
             </div>
             <div className="weather-impact-box">
               <span className="impact-label">Expected Impact</span>
-              <span className="impact-value">{weather.impact}</span>
+              <span className="impact-value">{weather?.impact || 'N/A'}</span>
             </div>
           </div>
         </div>
-
-        {/* Historical Comparison - NEW SEPARATE COMPONENT */}
-        <HistoricalComparison historical={historical} />
 
         {/* Labor Prediction */}
         <div className="info-card card labor-card">
@@ -202,23 +204,23 @@ const InfoSections = () => {
             <div className="labor-metrics">
               <div className="labor-metric">
                 <span className="metric-label">Predicted</span>
-                <span className="metric-value">{labor.predicted}</span>
+                <span className="metric-value">{labor?.predicted || '0'}</span>
                 <span className="metric-unit">staff</span>
               </div>
               <div className="labor-metric">
                 <span className="metric-label">Planned</span>
-                <span className="metric-value">{labor.planned}</span>
+                <span className="metric-value">{labor?.planned || '0'}</span>
                 <span className="metric-unit">staff</span>
               </div>
               <div className="labor-metric variance">
                 <span className="metric-label">Variance</span>
-                <span className="metric-value">{labor.variance}</span>
+                <span className="metric-value">{labor?.variance || '0'}</span>
                 <span className="metric-unit">staff</span>
               </div>
             </div>
             <div className="recommendation-box">
               <span className="recommendation-label">AI Recommendation</span>
-              <p className="recommendation-text">{labor.recommendation}</p>
+              <p className="recommendation-text">{labor?.recommendation || 'No recommendation available'}</p>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { History, Clock, ShoppingCart, Users, AlertCircle, Calendar, RefreshCw } from 'lucide-react';
+import { History, Clock, ShoppingCart, Users, AlertCircle, Calendar } from 'lucide-react';
 import { dinemetraAPI } from '../../services/dinemetraService.js';
 import './CSS/HistoricalComparison.css';
 
@@ -8,33 +8,26 @@ const getData = (response) => response?.data || {};
 const formatValue = (value, fallback = 'N/A') => (value === null || value === undefined || value === '') ? fallback : value;
 const formatPercent = (value) => (value === null || value === undefined) ? null : parseFloat(value).toFixed(1);
 
-const HistoricalComparison = () => {
+const HistoricalComparison = ({ dateRange }) => {
   const [historicalData, setHistoricalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('overview');
-  
-  // Date range state - initialize with current date and last 30 days
-  const today = new Date().toISOString().split('T')[0];
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  
-  const [dateRange, setDateRange] = useState({
-    startDate: thirtyDaysAgo,
-    endDate: today
-  });
-  
   const [trendsWeeks, setTrendsWeeks] = useState(8);
-  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    fetchHistoricalData();
-  }, []);
+    if (dateRange?.startDate && dateRange?.endDate) {
+      fetchHistoricalData();
+    }
+  }, [dateRange, trendsWeeks]);
 
   const fetchHistoricalData = async () => {
+    if (!dateRange?.startDate || !dateRange?.endDate) return;
+    
     try {
       setLoading(true);
       
-      // Fetch data with date parameters
+      // Fetch data with date parameters from centralized dateRange
       const [waitTimes, sales, busyness, trends, summary] = await Promise.all([
         dinemetraAPI.compareWaitTimes(dateRange.startDate, dateRange.endDate),
         dinemetraAPI.compareSales(dateRange.startDate, dateRange.endDate),
@@ -56,21 +49,11 @@ const HistoricalComparison = () => {
       setError('Failed to load historical comparisons. Please try again.');
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
-  };
-
-  const handleDateChange = (field, value) => {
-    setDateRange(prev => ({ ...prev, [field]: value }));
   };
 
   const handleTrendsWeeksChange = (weeks) => {
     setTrendsWeeks(parseInt(weeks));
-  };
-
-  const applyDateRange = () => {
-    setRefreshing(true);
-    fetchHistoricalData();
   };
 
   if (loading) {
@@ -129,78 +112,6 @@ const HistoricalComparison = () => {
         </div>
       </div>
 
-      {/* Date Range Controls */}
-      <div className="date-range-controls">
-        {viewMode === 'trends' ? (
-          <div className="trends-controls">
-            <label htmlFor="trends-weeks">
-              <Calendar size={16} />
-              Weeks:
-            </label>
-            <select 
-              id="trends-weeks"
-              value={trendsWeeks} 
-              onChange={(e) => handleTrendsWeeksChange(e.target.value)}
-            >
-              <option value="4">Last 4 weeks</option>
-              <option value="8">Last 8 weeks</option>
-              <option value="12">Last 12 weeks</option>
-              <option value="26">Last 26 weeks</option>
-            </select>
-            <button 
-              className="refresh-btn" 
-              onClick={applyDateRange}
-              disabled={refreshing}
-            >
-              <RefreshCw size={16} className={refreshing ? 'spinning' : ''} />
-              Apply
-            </button>
-          </div>
-        ) : (
-          <div className="standard-controls">
-            <div className="date-input-group">
-              <label htmlFor="start-date">
-                <Calendar size={16} />
-                Start:
-              </label>
-              <input 
-                id="start-date"
-                type="date" 
-                value={dateRange.startDate} 
-                onChange={(e) => handleDateChange('startDate', e.target.value)}
-                max={dateRange.endDate}
-              />
-            </div>
-            <div className="date-input-group">
-              <label htmlFor="end-date">
-                <Calendar size={16} />
-                End:
-              </label>
-              <input 
-                id="end-date"
-                type="date" 
-                value={dateRange.endDate} 
-                onChange={(e) => handleDateChange('endDate', e.target.value)}
-                min={dateRange.startDate}
-                max={today}
-              />
-            </div>
-            <button 
-              className="refresh-btn" 
-              onClick={applyDateRange}
-              disabled={refreshing}
-            >
-              <RefreshCw size={16} className={refreshing ? 'spinning' : ''} />
-              {refreshing ? 'Loading...' : 'Apply'}
-            </button>
-          </div>
-        )}
-      </div>
-      <div className="current-range-display">
-        Current range: <strong>{dateRange.startDate}</strong> to <strong>{dateRange.endDate}</strong>
-        {viewMode === 'trends' && <span> • Trends: <strong>{trendsWeeks} weeks</strong></span>}
-      </div>
-
       {/* Overview Mode */}
       {viewMode === 'overview' && (
         <div className="overview-grid">
@@ -234,9 +145,6 @@ const HistoricalComparison = () => {
                 </span>
                 <TrendIndicator value={waitTimes.last_year?.change_percent} />
               </div>
-            </div>
-            <div className="card-date-range">
-              <small>Date range: {dateRange.startDate} to {dateRange.endDate}</small>
             </div>
             {waitTimes.insight && (
               <div className="insight-box">
@@ -277,9 +185,6 @@ const HistoricalComparison = () => {
                 <TrendIndicator value={sales.last_year?.change_percent} />
               </div>
             </div>
-            <div className="card-date-range">
-              <small>Date range: {dateRange.startDate} to {dateRange.endDate}</small>
-            </div>
             {sales.insight && (
               <div className="insight-box">
                 <span className="insight-icon">📊</span>
@@ -319,9 +224,6 @@ const HistoricalComparison = () => {
                 <TrendIndicator value={busyness.last_year?.change_percent} />
               </div>
             </div>
-            <div className="card-date-range">
-              <small>Date range: {dateRange.startDate} to {dateRange.endDate}</small>
-            </div>
             {busyness.insight && (
               <div className="insight-box">
                 <span className="insight-icon">📈</span>
@@ -342,7 +244,8 @@ const HistoricalComparison = () => {
             </p>
           </div>
           <div className="current-range-display">
-            Data range: {dateRange.startDate} to {dateRange.endDate}
+            <Calendar size={16} />
+            Data range: {dateRange?.startDate} to {dateRange?.endDate}
           </div>
         </div>
       )}
@@ -350,7 +253,20 @@ const HistoricalComparison = () => {
       {/* Trends Mode */}
       {viewMode === 'trends' && (
         <div className="trends-section">
-          <h3>{trendsWeeks}-Week Trends</h3>
+          <div className="trends-header">
+            <h3>{trendsWeeks}-Week Trends</h3>
+            <select 
+              value={trendsWeeks} 
+              onChange={(e) => handleTrendsWeeksChange(e.target.value)}
+              className="trends-weeks-select"
+            >
+              <option value="4">4 Weeks</option>
+              <option value="8">8 Weeks</option>
+              <option value="12">12 Weeks</option>
+              <option value="16">16 Weeks</option>
+            </select>
+          </div>
+          
           {trends.weekly_data && trends.weekly_data.length > 0 ? (
             <>
               <div className="trends-chart">
@@ -395,7 +311,7 @@ const HistoricalComparison = () => {
         <div className="summary-item">
           <span className="summary-label">Data Range</span>
           <span className="summary-value">
-            {summaryDateRange.start || 'N/A'} to {summaryDateRange.end || 'N/A'}
+            {dateRange?.startDate || 'N/A'} to {dateRange?.endDate || 'N/A'}
           </span>
         </div>
         <div className="summary-item">
@@ -418,6 +334,8 @@ const HistoricalComparison = () => {
           <details className="debug-details">
             <summary>🔍 Historical Data Debug</summary>
             <div className="debug-content">
+              <h4>Date Range:</h4>
+              <pre>{JSON.stringify(dateRange, null, 2)}</pre>
               <h4>Wait Times:</h4>
               <pre>{JSON.stringify(waitTimes, null, 2)}</pre>
               <h4>Sales:</h4>
