@@ -42,7 +42,7 @@ app = FastAPI(
     title="Dinemetra API",
     description="Backend for Restaurant Prediction System",
     version="1.1.0",
-    lifespan=lifespan,  # <--- Register the lifespan handler here
+    lifespan=lifespan,
 )
 
 # --- CORS CONFIGURATION ---
@@ -60,6 +60,7 @@ app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"]
 app.include_router(monitoring.router, prefix="/api/monitoring", tags=["monitoring"])
 app.include_router(websocket.router)
 app.include_router(historical.router)
+app.include_router(alerts.router)
 
 
 # --- HEALTH CHECK ---

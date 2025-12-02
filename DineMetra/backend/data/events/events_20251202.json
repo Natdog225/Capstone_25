@@ -1,0 +1,121 @@
+{
+  "events": [
+    {
+      "event_name": "Trans-Siberian Orchestra - The Ghosts Of Christmas Eve",
+      "event_type": "concert",
+      "event_datetime": "2025-12-03T19:00:00",
+      "event_date": "2025-12-03",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TSO SUITES",
+      "event_type": "other",
+      "event_datetime": "2025-12-03T19:00:00",
+      "event_date": "2025-12-03",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TSO SKY CLUB",
+      "event_type": "other",
+      "event_datetime": "2025-12-03T19:00:00",
+      "event_date": "2025-12-03",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TSO UPCHARGE",
+      "event_type": "other",
+      "event_datetime": "2025-12-03T19:00:00",
+      "event_date": "2025-12-03",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TSO CLUB SEATS",
+      "event_type": "other",
+      "event_datetime": "2025-12-03T19:00:00",
+      "event_date": "2025-12-03",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TSO CLUB SEATS",
+      "event_type": "other",
+      "event_datetime": "2025-12-03T19:00:00",
+      "event_date": "2025-12-03",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "Keller Williams",
+      "event_type": "concert",
+      "event_datetime": "2025-12-04T20:00:00",
+      "event_date": "2025-12-04",
+      "distance_miles": 0.3483307045550841,
+      "attendance_estimated": 1000,
+      "venue_name": "The Vanguard"
+    },
+    {
+      "event_name": "Tulsa Oilers Vs Wichita Thunder - Game 9",
+      "event_type": "sports",
+      "event_datetime": "2025-12-05T19:05:00",
+      "event_date": "2025-12-05",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TULSA OILERS SUITES",
+      "event_type": "other",
+      "event_datetime": "2025-12-05T19:05:00",
+      "event_date": "2025-12-05",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "Avatar",
+      "event_type": "concert",
+      "event_datetime": "2025-12-06T19:30:00",
+      "event_date": "2025-12-06",
+      "distance_miles": 0.3765698226643657,
+      "attendance_estimated": 1000,
+      "venue_name": "Tulsa Theater"
+    },
+    {
+      "event_name": "Tulsa Oilers Vs Kansas City Mavericks - Game 10",
+      "event_type": "sports",
+      "event_datetime": "2025-12-07T15:05:00",
+      "event_date": "2025-12-07",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TULSA OILERS SUITES",
+      "event_type": "other",
+      "event_datetime": "2025-12-07T15:05:00",
+      "event_date": "2025-12-07",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "American Aquarium",
+      "event_type": "concert",
+      "event_datetime": "2025-12-07T19:30:00",
+      "event_date": "2025-12-07",
+      "distance_miles": 0.3765698226643657,
+      "attendance_estimated": 1500,
+      "venue_name": "Cain's Ballroom"
+    }
+  ]
+}
