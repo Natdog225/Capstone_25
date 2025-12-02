@@ -1,79 +1,88 @@
-import React from 'react';
-import { ShoppingCart, Wine, Beer, DollarSign, Users, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  ShoppingCart, 
+  Wine, 
+  Beer, 
+  Users, 
+  TrendingUp,
+  DollarSign,
+  Calendar
+} from 'lucide-react';
+import { dinemetraAPI } from '../../services/dinemetraService';
 import './CSS/Metricsgrid.css';
 
-const MetricsGrid = () => {
-  const metrics = [
-    {
-      id: 1,
-      title: 'Best Sellers',
-      icon: ShoppingCart,
-      items: [
-        { name: 'Burger Special', value: '156', trend: 'up' },
-        { name: 'Fish Tacos', value: '132', trend: 'up' },
-        { name: 'Caesar Salad', value: '98', trend: 'down' },
-      ]
-    },
-    {
-      id: 2,
-      title: 'Bar Drinks',
-      icon: Wine,
-      items: [
-        { name: 'Cocktails', value: '245', trend: 'up' },
-        { name: 'Wine', value: '189', trend: 'stable' },
-        { name: 'Spirits', value: '156', trend: 'up' },
-      ]
-    },
-    {
-      id: 3,
-      title: 'Top Beers',
-      icon: Beer,
-      items: [
-        { name: 'IPA Draft', value: '98', trend: 'up' },
-        { name: 'Lager', value: '76', trend: 'stable' },
-        { name: 'Stout', value: '54', trend: 'down' },
-      ]
-    },
-    {
-      id: 4,
-      title: 'Labor Cost',
-      icon: Users,
-      percentage: '28.5%',
-      target: '30%',
-      status: 'good',
-      details: 'Within target range'
-    },
-    {
-      id: 5,
-      title: 'Actual vs Expected',
-      icon: TrendingUp,
-      percentage: '104%',
-      variance: '+$4,200',
-      status: 'excellent',
-      details: 'Exceeding projections'
-    }
-  ];
+const iconMap = {
+  ShoppingCart: ShoppingCart,
+  Wine: Wine,
+  Beer: Beer,
+  Users: Users,
+  TrendingUp: TrendingUp,
+  DollarSign: DollarSign
+};
 
-  const purchasingEstimates = [
-    { item: 'Produce', estimate: '$1,850', status: 'Order Today' },
-    { item: 'Meat/Seafood', estimate: '$2,400', status: 'Order Tomorrow' },
-    { item: 'Bar Supplies', estimate: '$980', status: 'Stock OK' }
-  ];
+const MetricsGrid = ({ dateRange, onPeriodChange }) => {
+  const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        setLoading(true);
+        // Pass the date range to the API
+        const data = await dinemetraAPI.getMetrics(dateRange.startDate, dateRange.endDate);
+        setMetrics(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load metrics:', err);
+        setError('Failed to load metrics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMetrics();
+  }, [dateRange]);
+
+  if (loading) {
+    return (
+      <div className="metrics-section">
+        <div className="loading-grid">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="metric-card card loading">
+              <div className="loading-spinner">Loading...</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !metrics) {
+    return (
+      <div className="metrics-section">
+        <div className="error-message">
+          <p>⚠️ {error || 'Failed to load metrics'}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  const { categories = [], summaries = [], purchasing = [] } = metrics;
 
   return (
     <div className="metrics-section">
-      <div className="metrics-header">
-        <h2 className="section-title">30 Day Average</h2>
-        <span className="date-range">Oct 26 - Nov 25</span>
-      </div>
-
+        <div className="metrics-header">
+        <h2 className="section-title">Sales Metrics</h2>
+        </div>
       <div className="metrics-grid">
-        {metrics.slice(0, 3).map((metric) => {
-          const Icon = metric.icon;
+        {(categories || []).map((metric) => {
+          const IconComponent = iconMap[metric.icon] || ShoppingCart;
           return (
             <div key={metric.id} className="metric-card card">
               <div className="metric-card-header">
-                <Icon size={20} className="metric-icon" />
+                <IconComponent size={20} className="metric-icon" />
                 <h3 className="metric-title">{metric.title}</h3>
               </div>
               <div className="metric-items">
@@ -94,12 +103,12 @@ const MetricsGrid = () => {
       </div>
 
       <div className="secondary-metrics">
-        {metrics.slice(3).map((metric) => {
-          const Icon = metric.icon;
+        {(summaries || []).map((metric) => {
+          const IconComponent = iconMap[metric.icon] || Users;
           return (
             <div key={metric.id} className={`metric-highlight card ${metric.status}`}>
               <div className="highlight-header">
-                <Icon size={20} className="metric-icon" />
+                <IconComponent size={20} className="metric-icon" />
                 <h3 className="metric-title">{metric.title}</h3>
               </div>
               <div className="highlight-value">{metric.percentage}</div>
@@ -115,22 +124,24 @@ const MetricsGrid = () => {
         })}
       </div>
 
-      <div className="purchasing-section card">
-        <h3 className="section-title">Purchasing Estimates</h3>
-        <div className="purchasing-grid">
-          {purchasingEstimates.map((item, index) => (
-            <div key={index} className="purchasing-item">
-              <div className="purchasing-info">
-                <span className="purchasing-name">{item.item}</span>
-                <span className="purchasing-estimate">{item.estimate}</span>
+      {purchasing.length > 0 && (
+        <div className="purchasing-section card">
+          <h3 className="section-title">Purchasing Estimates</h3>
+          <div className="purchasing-grid">
+            {purchasing.map((item, index) => (
+              <div key={index} className="purchasing-item">
+                <div className="purchasing-info">
+                  <span className="purchasing-name">{item.item}</span>
+                  <span className="purchasing-estimate">{item.estimate}</span>
+                </div>
+                <span className={`purchasing-status ${item.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                  {item.status}
+                </span>
               </div>
-              <span className={`purchasing-status ${item.status.toLowerCase().replace(' ', '-')}`}>
-                {item.status}
-              </span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
