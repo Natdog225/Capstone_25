@@ -44,7 +44,7 @@ class EnhancedPredictionService:
             timestamp = datetime.now()
 
         try:
-            # Get base prediction from YOUR model
+            # Get base prediction from model
             base_result = self.wait_time_predictor.predict(
                 party_size=party_size,
                 timestamp=timestamp,

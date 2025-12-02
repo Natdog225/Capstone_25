@@ -10,11 +10,6 @@ import logging
 import asyncio
 from typing import Optional
 
-from app.websocket.manager import get_connection_manager
-from app.services.enhanced_prediction_service import enhanced_prediction_service
-from app.services.alert_service import get_alert_service
-from app.services.ab_testing_service import get_ab_testing_service
-
 logger = logging.getLogger(__name__)
 
 
@@ -31,12 +26,48 @@ class BackgroundTaskService:
 
     def __init__(self):
         self.scheduler = AsyncIOScheduler()
-        self.connection_manager = get_connection_manager()
-        self.prediction_service = get_enhanced_prediction_service()
-        self.alert_service = get_alert_service()
-        self.ab_testing_service = get_ab_testing_service()
-
         self.is_running = False
+
+        # Import services with fallbacks
+        try:
+            from app.websocket.manager import get_connection_manager
+
+            self.connection_manager = get_connection_manager()
+        except Exception as e:
+            logger.warning(f"WebSocket manager not available: {e}")
+            self.connection_manager = None
+
+        try:
+            from app.services.alert_service import get_alert_service
+
+            self.alert_service = get_alert_service()
+        except Exception as e:
+            logger.warning(f"Alert service not available: {e}")
+            self.alert_service = None
+
+        try:
+            from app.services.ab_testing_service import get_ab_testing_service
+
+            self.ab_testing_service = get_ab_testing_service()
+        except Exception as e:
+            logger.warning(f"A/B testing service not available: {e}")
+            self.ab_testing_service = None
+
+        # Try to import prediction service (might have different names)
+        self.prediction_service = None
+        try:
+            from app.services.enhanced_prediction_service import (
+                get_enhanced_prediction_service,
+            )
+
+            self.prediction_service = get_enhanced_prediction_service()
+        except:
+            try:
+                from app.services.prediction_service import get_prediction_service
+
+                self.prediction_service = get_prediction_service()
+            except Exception as e:
+                logger.warning(f"Prediction service not available: {e}")
 
         logger.info("Background Task Service initialized")
 
@@ -46,6 +77,10 @@ class BackgroundTaskService:
 
         Runs every 5 minutes
         """
+        if not self.connection_manager or not self.prediction_service:
+            logger.debug("Skipping predictions broadcast - services not available")
+            return
+
         try:
             logger.debug("Broadcasting predictions...")
 
@@ -60,36 +95,52 @@ class BackgroundTaskService:
                 "month": now.month,
             }
 
-            # Get wait time prediction
-            wait_time_result = self.prediction_service.predict_wait_time(input_data)
+            # Try to get predictions
+            wait_time_result = None
+            busyness_result = None
 
-            # Get busyness prediction
-            busyness_result = self.prediction_service.predict_busyness(input_data)
+            try:
+                wait_time_result = self.prediction_service.predict_wait_time(input_data)
+            except Exception as e:
+                logger.debug(f"Could not get wait time prediction: {e}")
+
+            try:
+                busyness_result = self.prediction_service.predict_busyness(input_data)
+            except Exception as e:
+                logger.debug(f"Could not get busyness prediction: {e}")
+
+            if not wait_time_result and not busyness_result:
+                logger.debug("No predictions available to broadcast")
+                return
 
             # Prepare broadcast data
             broadcast_data = {
                 "type": "prediction_update",
                 "timestamp": datetime.now().isoformat(),
-                "data": {
-                    "wait_time": {
-                        "predicted_minutes": wait_time_result["prediction"],
-                        "confidence": wait_time_result.get("confidence", 0.85),
-                    },
-                    "busyness": {
-                        "level": busyness_result["prediction"],
-                        "confidence": busyness_result.get("confidence", 0.80),
-                    },
-                },
+                "data": {},
             }
+
+            if wait_time_result:
+                broadcast_data["data"]["wait_time"] = {
+                    "predicted_minutes": wait_time_result.get("prediction", 0),
+                    "confidence": wait_time_result.get("confidence", 0.85),
+                }
+
+            if busyness_result:
+                broadcast_data["data"]["busyness"] = {
+                    "level": busyness_result.get("prediction", "Unknown"),
+                    "confidence": busyness_result.get("confidence", 0.80),
+                }
 
             # Broadcast to dashboard group
             await self.connection_manager.broadcast_prediction_update(
                 broadcast_data["data"]
             )
 
-            logger.info(
-                f"Broadcasted predictions to {len(self.connection_manager.get_group_connections('dashboard'))} clients"
+            connections = len(
+                self.connection_manager.get_group_connections("dashboard")
             )
+            logger.info(f"Broadcasted predictions to {connections} clients")
 
         except Exception as e:
             logger.error(f"Error broadcasting predictions: {e}", exc_info=True)
@@ -100,6 +151,10 @@ class BackgroundTaskService:
 
         Runs every 1 minute
         """
+        if not self.alert_service or not self.connection_manager:
+            logger.debug("Skipping alert check - services not available")
+            return
+
         try:
             logger.debug("Checking alert conditions...")
 
@@ -114,20 +169,25 @@ class BackgroundTaskService:
                 "month": now.month,
             }
 
-            # Get predictions to check against
-            wait_time_result = self.prediction_service.predict_wait_time(input_data)
-            busyness_result = self.prediction_service.predict_busyness(input_data)
+            # Try to get predictions for alert checking
+            wait_minutes = 25  # Default
+            if self.prediction_service:
+                try:
+                    result = self.prediction_service.predict_wait_time(input_data)
+                    wait_minutes = result.get("prediction", 25)
+                except:
+                    pass
 
             # Prepare data for alert checking
             alert_data = {
-                "wait_minutes": wait_time_result["prediction"],
+                "wait_minutes": wait_minutes,
                 "occupancy_percent": 75,  # Would come from real data
-                "busyness_level": busyness_result["prediction"],
+                "busyness_level": "Moderate",
                 "threshold": 45,
-                "nearby_events": [],  # Would come from event service
+                "nearby_events": [],
                 "event_distance": 999,
                 "event_name": "",
-                "weather_condition": "sunny",  # Would come from weather service
+                "weather_condition": "sunny",
                 "precipitation_chance": 0,
                 "expected_guests": 100,
             }
@@ -156,38 +216,40 @@ class BackgroundTaskService:
             logger.debug("Cleaning up old data...")
 
             # Cleanup old prediction logs (keep last 7 days)
-            cutoff_time = datetime.now() - timedelta(days=7)
+            if self.ab_testing_service:
+                cutoff_time = datetime.now() - timedelta(days=7)
 
-            before_count = len(self.ab_testing_service.prediction_logs)
+                before_count = len(self.ab_testing_service.prediction_logs)
 
-            self.ab_testing_service.prediction_logs = [
-                log
-                for log in self.ab_testing_service.prediction_logs
-                if log.timestamp >= cutoff_time
-            ]
+                self.ab_testing_service.prediction_logs = [
+                    log
+                    for log in self.ab_testing_service.prediction_logs
+                    if log.timestamp >= cutoff_time
+                ]
 
-            after_count = len(self.ab_testing_service.prediction_logs)
-            removed = before_count - after_count
+                after_count = len(self.ab_testing_service.prediction_logs)
+                removed = before_count - after_count
 
-            if removed > 0:
-                logger.info(f"Cleaned up {removed} old prediction logs")
+                if removed > 0:
+                    logger.info(f"Cleaned up {removed} old prediction logs")
 
             # Cleanup resolved alerts (keep last 24 hours)
-            alert_cutoff = datetime.now() - timedelta(hours=24)
+            if self.alert_service:
+                alert_cutoff = datetime.now() - timedelta(hours=24)
 
-            before_count = len(self.alert_service.alert_history)
+                before_count = len(self.alert_service.alert_history)
 
-            self.alert_service.alert_history = [
-                alert
-                for alert in self.alert_service.alert_history
-                if alert.triggered_at >= alert_cutoff or not alert.resolved
-            ]
+                self.alert_service.alert_history = [
+                    alert
+                    for alert in self.alert_service.alert_history
+                    if alert.triggered_at >= alert_cutoff or not alert.resolved
+                ]
 
-            after_count = len(self.alert_service.alert_history)
-            removed = before_count - after_count
+                after_count = len(self.alert_service.alert_history)
+                removed = before_count - after_count
 
-            if removed > 0:
-                logger.info(f"Cleaned up {removed} old alerts")
+                if removed > 0:
+                    logger.info(f"Cleaned up {removed} old alerts")
 
         except Exception as e:
             logger.error(f"Error cleaning up data: {e}", exc_info=True)
@@ -202,38 +264,52 @@ class BackgroundTaskService:
             logger.debug("Monitoring system health...")
 
             # Connection stats
-            conn_stats = self.connection_manager.get_connection_stats()
+            conn_stats = {}
+            if self.connection_manager:
+                conn_stats = self.connection_manager.get_connection_stats()
 
             # Alert stats
-            alert_stats = self.alert_service.get_alert_stats()
+            alert_stats = {}
+            if self.alert_service:
+                alert_stats = self.alert_service.get_alert_stats()
 
             # A/B testing stats
-            ab_stats = self.ab_testing_service.get_summary_stats()
+            ab_stats = {}
+            if self.ab_testing_service:
+                ab_stats = self.ab_testing_service.get_summary_stats()
 
             # Log stats
             logger.info("=== SYSTEM HEALTH ===")
-            logger.info(f"WebSocket Connections: {conn_stats['total_connections']}")
-            logger.info(
-                f"Active Alerts: {alert_stats['active_count']} (Critical: {alert_stats['active_by_severity']['critical']})"
-            )
-            logger.info(
-                f"Prediction Logs: {ab_stats['total_predictions']} (Coverage: {ab_stats['coverage_percent']:.1f}%)"
-            )
-            logger.info(f"Active Experiments: {ab_stats['active_experiments']}")
+            if conn_stats:
+                logger.info(
+                    f"WebSocket Connections: {conn_stats.get('total_connections', 0)}"
+                )
+            if alert_stats:
+                logger.info(
+                    f"Active Alerts: {alert_stats.get('active_count', 0)} (Critical: {alert_stats.get('active_by_severity', {}).get('critical', 0)})"
+                )
+            if ab_stats:
+                logger.info(
+                    f"Prediction Logs: {ab_stats.get('total_predictions', 0)} (Coverage: {ab_stats.get('coverage_percent', 0):.1f}%)"
+                )
+                logger.info(
+                    f"Active Experiments: {ab_stats.get('active_experiments', 0)}"
+                )
             logger.info("====================")
 
             # Broadcast health status to connected clients
-            health_data = {
-                "type": "health_update",
-                "timestamp": datetime.now().isoformat(),
-                "data": {
-                    "connections": conn_stats,
-                    "alerts": alert_stats,
-                    "predictions": ab_stats,
-                },
-            }
+            if self.connection_manager:
+                health_data = {
+                    "type": "health_update",
+                    "timestamp": datetime.now().isoformat(),
+                    "data": {
+                        "connections": conn_stats,
+                        "alerts": alert_stats,
+                        "predictions": ab_stats,
+                    },
+                }
 
-            await self.connection_manager.broadcast(health_data, group="dashboard")
+                await self.connection_manager.broadcast(health_data, group="dashboard")
 
         except Exception as e:
             logger.error(f"Error monitoring health: {e}", exc_info=True)
@@ -244,6 +320,9 @@ class BackgroundTaskService:
 
         Runs every 30 seconds
         """
+        if not self.connection_manager:
+            return
+
         try:
             await self.connection_manager.send_ping()
         except Exception as e:

@@ -20,7 +20,8 @@ from app.services.enhanced_prediction_service import enhanced_prediction_service
 # Import Response Schema
 from app.models.schemas import WaitTimePredictionResponse
 
-router = APIRouter()
+# ✅ FIX: Add proper prefix to organize endpoints
+router = APIRouter(prefix="/api/predictions", tags=["predictions"])
 
 
 # =============================================================================
@@ -48,17 +49,121 @@ class SalesRequest(BaseModel):
 
 
 # =============================================================================
-# ORIGINAL ENDPOINTS (Keep for backwards compatibility)
+# ENHANCED ENDPOINTS (Primary - with detailed factor breakdowns)
 # =============================================================================
 
 
-@router.post("/wait-time", response_model=WaitTimePredictionResponse)
-async def predict_wait_time_endpoint(request: WaitTimeRequest):
+@router.post("/wait-time")
+async def predict_wait_time_enhanced_endpoint(request: WaitTimeRequest):
     """
-    Predict wait time (ORIGINAL VERSION)
-    Auto-fetches Weather & Events, OR uses manual test overrides.
+    Enhanced wait time prediction with detailed factor breakdown
 
-    For enhanced version with factor breakdown, use /wait-time-enhanced
+    Returns:
+    - Predicted wait minutes
+    - Confidence score
+    - Detailed factors:
+      * Current occupancy impact
+      * Weather impact (from weather.gov)
+      * Event impact (from Ticketmaster)
+      * Time/day factors
+      * Historical comparison
+    - Human-readable explanation
+    """
+    try:
+        timestamp = request.timestamp or datetime.now()
+
+        result = enhanced_prediction_service.predict_wait_time_enhanced(
+            party_size=request.party_size,
+            current_occupancy=request.current_occupancy,
+            timestamp=timestamp,
+        )
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Enhanced wait time prediction failed: {str(e)}"
+        )
+
+
+@router.post("/busyness")
+async def predict_busyness_enhanced_endpoint(request: BusynessRequest):
+    """
+    Enhanced busyness prediction with detailed factor breakdown
+
+    Returns:
+    - Busyness level (Slow/Moderate/Busy/Peak)
+    - Percentage (0-100)
+    - Expected guest count
+    - Confidence score
+    - Detailed factors:
+      * Day/time factors
+      * Weather conditions
+      * Nearby events
+      * Historical comparison
+    - Staffing recommendation
+    """
+    try:
+        target_time = request.timestamp or datetime.now()
+
+        result = enhanced_prediction_service.predict_busyness_enhanced(
+            timestamp=target_time
+        )
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Enhanced busyness prediction failed: {str(e)}"
+        )
+
+
+@router.post("/sales")
+async def predict_sales_enhanced_endpoint(request: SalesRequest):
+    """
+    Enhanced sales prediction with detailed factor breakdown
+
+    Returns:
+    - Predicted quantity
+    - Confidence score
+    - Confidence margin (low/high range)
+    - Detailed factors:
+      * Day/date factors
+      * Weather impact (for weather-sensitive items)
+      * Event impact
+      * Historical trends
+    - Purchasing recommendation
+    """
+    try:
+        target_date = request.date or datetime.now()
+
+        result = enhanced_prediction_service.predict_sales_enhanced(
+            item_id=request.item_id,
+            target_date=target_date,
+            item_name=request.item_name,
+            category=request.category,
+        )
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Enhanced sales prediction failed: {str(e)}"
+        )
+
+
+# =============================================================================
+# ORIGINAL ENDPOINTS (for backwards compatibility)
+# =============================================================================
+
+
+@router.post("/wait-time-legacy", response_model=WaitTimePredictionResponse)
+async def predict_wait_time_legacy(request: WaitTimeRequest):
+    """
+    Predict wait time (LEGACY VERSION - for backwards compatibility)
+
+    Auto-fetches Weather & Events, OR uses manual test overrides.
+    Use /wait-time for the enhanced version with factor breakdown.
     """
     try:
         timestamp = request.timestamp or datetime.now()
@@ -83,12 +188,12 @@ async def predict_wait_time_endpoint(request: WaitTimeRequest):
         )
 
 
-@router.post("/busyness")
-async def predict_busyness_endpoint(request: BusynessRequest):
+@router.post("/busyness-legacy")
+async def predict_busyness_legacy(request: BusynessRequest):
     """
-    Predict busyness (ORIGINAL VERSION)
+    Predict busyness (LEGACY VERSION - for backwards compatibility)
 
-    For enhanced version with factor breakdown, use /busyness-enhanced
+    Use /busyness for the enhanced version with factor breakdown.
     """
     try:
         target_time = request.timestamp or datetime.now()
@@ -102,12 +207,12 @@ async def predict_busyness_endpoint(request: BusynessRequest):
         )
 
 
-@router.post("/sales")
-async def predict_sales_endpoint(request: SalesRequest):
+@router.post("/sales-legacy")
+async def predict_sales_legacy(request: SalesRequest):
     """
-    Predict item sales (ORIGINAL VERSION)
+    Predict item sales (LEGACY VERSION - for backwards compatibility)
 
-    For enhanced version with factor breakdown, use /sales-enhanced
+    Use /sales for the enhanced version with factor breakdown.
     """
     try:
         target_date = request.date or datetime.now()
@@ -120,123 +225,17 @@ async def predict_sales_endpoint(request: SalesRequest):
 
 
 # =============================================================================
-# ENHANCED ENDPOINTS (with detailed factor breakdowns)
-# =============================================================================
-
-
-@router.post("/wait-time-enhanced")
-async def predict_wait_time_enhanced_endpoint(request: WaitTimeRequest):
-    """
-    Enhanced wait time prediction with detailed factor breakdown
-
-    Returns:
-    - Predicted wait minutes
-    - Confidence score
-    - Detailed factors:
-      * Current occupancy impact
-      * Weather impact (from weather.gov)
-      * Event impact (from Ticketmaster)
-      * Time/day factors
-      * Historical comparison
-    - Human-readable explanation
-
-    """
-    try:
-        timestamp = request.timestamp or datetime.now()
-
-        result = enhanced_prediction_service.predict_wait_time_enhanced(
-            party_size=request.party_size,
-            current_occupancy=request.current_occupancy,
-            timestamp=timestamp,
-        )
-
-        return result
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Enhanced wait time prediction failed: {str(e)}"
-        )
-
-
-@router.post("/busyness-enhanced")
-async def predict_busyness_enhanced_endpoint(request: BusynessRequest):
-    """
-    Enhanced busyness prediction with detailed factor breakdown
-
-    Returns:
-    - Busyness level (Slow/Moderate/Busy/Peak)
-    - Percentage (0-100)
-    - Expected guest count
-    - Confidence score
-    - Detailed factors:
-      * Day/time factors
-      * Weather conditions
-      * Nearby events
-      * Historical comparison
-    - Staffing recommendation
-
-    """
-    try:
-        target_time = request.timestamp or datetime.now()
-
-        result = enhanced_prediction_service.predict_busyness_enhanced(
-            timestamp=target_time
-        )
-
-        return result
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Enhanced busyness prediction failed: {str(e)}"
-        )
-
-
-@router.post("/sales-enhanced")
-async def predict_sales_enhanced_endpoint(request: SalesRequest):
-    """
-    Enhanced sales prediction with detailed factor breakdown
-
-    Returns:
-    - Predicted quantity
-    - Confidence score
-    - Confidence margin (low/high range)
-    - Detailed factors:
-      * Day/date factors
-      * Weather impact (for weather-sensitive items)
-      * Event impact
-      * Historical trends
-    - Purchasing recommendation
-
-    """
-    try:
-        target_date = request.date or datetime.now()
-
-        result = enhanced_prediction_service.predict_sales_enhanced(
-            item_id=request.item_id,
-            target_date=target_date,
-            item_name=request.item_name,
-            category=request.category,
-        )
-
-        return result
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Enhanced sales prediction failed: {str(e)}"
-        )
-
-
-# =============================================================================
 # COMPARISON ENDPOINT (helps understand the difference)
 # =============================================================================
 
 
-@router.post("/compare-predictions")
+@router.post("/compare")
 async def compare_predictions(request: WaitTimeRequest):
     """
     Compare original vs enhanced predictions
 
-    Useful for testing and understanding the differences
+    Useful for testing and understanding the differences between
+    legacy predictions and enhanced predictions with detailed factors.
     """
     try:
         timestamp = request.timestamp or datetime.now()
