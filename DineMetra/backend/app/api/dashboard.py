@@ -15,7 +15,6 @@ from app.services.weather_service import WeatherService
 from app.services.enhanced_prediction_service import enhanced_prediction_service
 from app.services.dashboard_service import dashboard_service
 
-# ✅ ADD PREFIX HERE - This is the ONLY change from your working version
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
 # Initialize services
