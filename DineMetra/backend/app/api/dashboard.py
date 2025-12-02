@@ -1,310 +1,229 @@
 """
-Dashboard API - Updated to use Enhanced Prediction Service
-Integrates with your existing services + new dashboard aggregation
+Dashboard API - Backwards Compatible Version
+Supports both /dashboard and /api/dashboard URLs
 """
 
-from fastapi import APIRouter, Query
-from datetime import datetime
-from typing import Optional
+from fastapi import APIRouter, HTTPException
+import logging
 
-# Import existing services
-from app.services.event_service import EventService
-from app.services.weather_service import WeatherService
+from app.services.dashboard_service import get_dashboard_service
 
-# Import new enhanced services
-from app.services.enhanced_prediction_service import enhanced_prediction_service
-from app.services.dashboard_service import dashboard_service
+logger = logging.getLogger(__name__)
 
-router = APIRouter()
+# New organized router with prefix
+router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
-# Initialize services
-event_service = EventService()
-weather_service = WeatherService()
+# Legacy router without prefix (for backwards compatibility)
+legacy_router = APIRouter(tags=["dashboard-legacy"])
 
 
 # =============================================================================
-# CONSOLIDATED DASHBOARD ENDPOINT
+# SHARED IMPLEMENTATIONS
 # =============================================================================
+
+
+def _get_dashboard_impl():
+    """Shared dashboard implementation"""
+    service = get_dashboard_service()
+    return service.get_complete_dashboard()
+
+
+def _get_highlights_impl():
+    """Shared highlights implementation"""
+    service = get_dashboard_service()
+    return service.get_highlights()
+
+
+def _get_sales_chart_impl():
+    """Shared sales chart implementation"""
+    service = get_dashboard_service()
+    return service.get_sales_chart()
+
+
+def _get_metrics_impl():
+    """Shared metrics implementation"""
+    service = get_dashboard_service()
+    return service.get_metrics_grid()
+
+
+def _get_info_sections_impl():
+    """Shared info sections implementation"""
+    service = get_dashboard_service()
+    return service.get_info_sections()
+
+
+# =============================================================================
+# NEW ORGANIZED ENDPOINTS (under /api/dashboard)
+# =============================================================================
+
+
+@router.get("/")
+async def get_full_dashboard_new():
+    """
+    Get complete dashboard (NEW URL: /api/dashboard/)
+
+    Returns everything the dashboard needs in one call.
+    """
+    try:
+        return _get_dashboard_impl()
+    except Exception as e:
+        logger.error(f"Dashboard fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/dashboard")
-async def get_full_dashboard():
+async def get_full_dashboard_alt():
     """
-    Get complete dashboard in ONE call
+    Get complete dashboard (ALTERNATE: /api/dashboard/dashboard)
 
-    Returns highlights, metrics, info sections, and user data
+    Same as /api/dashboard/ - provided for convenience.
     """
     try:
-        return {
-            "highlights": dashboard_service.get_highlights(),
-            "metrics": dashboard_service.get_metrics(),
-            "info_sections": dashboard_service.get_info_sections(),
-            "user": {"name": "Manager", "restaurant": "Tulsa Capstone Grill"},
-            "timestamp": datetime.now().isoformat(),
-        }
+        return _get_dashboard_impl()
     except Exception as e:
-        return {
-            "error": str(e),
-            "highlights": [],
-            "metrics": {},
-            "info_sections": {},
-            "user": {},
-        }
-
-
-# =============================================================================
-# INDIVIDUAL DASHBOARD ENDPOINTS (for flexibility)
-# =============================================================================
+        logger.error(f"Dashboard fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/highlights")
-async def get_dashboard_highlights():
+async def get_highlights_new():
     """
-    Returns key events for the week (Powered by Ticketmaster + Weather)
-    Enhanced with detailed event and weather information
+    Get dashboard highlights (NEW URL: /api/dashboard/highlights)
+
+    Returns:
+    - Upcoming events
+    - Current weather
+    - Peak days this week
     """
     try:
-        highlights = dashboard_service.get_highlights()
-        return {"highlights": highlights, "timestamp": datetime.now().isoformat()}
+        return _get_highlights_impl()
     except Exception as e:
-        return {"highlights": [], "error": str(e)}
+        logger.error(f"Highlights fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/sales-chart")
-async def get_sales_chart(
-    week: str = Query("this-week", description="Period: this-week, last-week, custom")
-):
+async def get_sales_chart_new():
     """
-    Returns sales data with predictions for future days
+    Get 7-day sales chart (NEW URL: /api/dashboard/sales-chart)
+
+    Returns sales data with predictions for future days.
     """
     try:
-        chart_data = dashboard_service.get_sales_chart_data(period=week)
-        return {
-            "data": chart_data,
-            "period": week,
-            "timestamp": datetime.now().isoformat(),
-        }
+        return _get_sales_chart_impl()
     except Exception as e:
-        return {"data": [], "error": str(e)}
+        logger.error(f"Sales chart fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/metrics")
-async def get_metrics_grid():
+async def get_metrics_new():
     """
-    Returns top sellers, KPI summaries, and purchasing estimates
-    Enhanced with ML-powered purchasing predictions
+    Get metrics grid (NEW URL: /api/dashboard/metrics)
+
+    Returns top sellers, KPI summaries, and purchasing estimates.
     """
     try:
-        metrics = dashboard_service.get_metrics()
-        return {
-            "categories": metrics.get("categories", []),
-            "summaries": metrics.get("summaries", []),
-            "purchasing": metrics.get("purchasing", []),
-            "timestamp": datetime.now().isoformat(),
-        }
+        return _get_metrics_impl()
     except Exception as e:
-        return {"categories": [], "summaries": [], "purchasing": [], "error": str(e)}
+        logger.error(f"Metrics fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/info-sections")
-async def get_info_sections():
+async def get_info_sections_new():
     """
-    Aggregates Weather, Events, Labor, and Historical data
-    Uses real weather.gov + Ticketmaster data
-    """
-    try:
-        info = dashboard_service.get_info_sections()
-        return {
-            "events": info.get("events", []),
-            "weather": info.get("weather", {}),
-            "labor": info.get("labor", {}),
-            "historical": info.get("historical", {}),
-            "timestamp": datetime.now().isoformat(),
-        }
-    except Exception as e:
-        return {
-            "events": [],
-            "weather": {},
-            "labor": {},
-            "historical": {},
-            "error": str(e),
-        }
+    Get info sections (NEW URL: /api/dashboard/info-sections)
 
-
-# =============================================================================
-# ENHANCED PREDICTION ENDPOINTS (with detailed factors)
-# =============================================================================
-
-
-@router.post("/predictions/wait-time-enhanced")
-async def predict_wait_time_enhanced(
-    party_size: int = Query(..., ge=1, le=20),
-    current_occupancy: float = Query(..., ge=0, le=100),
-    timestamp: Optional[str] = Query(None, description="ISO format datetime"),
-):
-    """
-    Enhanced wait time prediction with detailed factor breakdown
-
-    Shows WHY the prediction is what it is:
-    - Weather impact
-    - Event impact
-    - Time/occupancy factors
-    - Historical comparison
+    Returns:
+    - Events list
+    - Weather details
+    - Labor recommendations
+    - Historical comparisons
     """
     try:
-        target_time = datetime.fromisoformat(timestamp) if timestamp else None
-
-        result = enhanced_prediction_service.predict_wait_time_enhanced(
-            party_size=party_size,
-            current_occupancy=current_occupancy,
-            timestamp=target_time,
-        )
-
-        return result
-
+        return _get_info_sections_impl()
     except Exception as e:
-        return {"predicted_wait_minutes": 15, "error": str(e), "factors": {}}
-
-
-@router.get("/predictions/busyness-enhanced")
-async def predict_busyness_enhanced(
-    timestamp: Optional[str] = Query(None, description="ISO format datetime")
-):
-    """
-    Enhanced busyness prediction with detailed factor breakdown
-
-    Shows:
-    - Expected busyness level
-    - Weather impact
-    - Nearby events
-    - Staffing recommendations
-    """
-    try:
-        target_time = datetime.fromisoformat(timestamp) if timestamp else None
-
-        result = enhanced_prediction_service.predict_busyness_enhanced(
-            timestamp=target_time
-        )
-
-        return result
-
-    except Exception as e:
-        return {"level": "Moderate", "error": str(e), "factors": {}}
-
-
-@router.get("/predictions/sales-enhanced")
-async def predict_sales_enhanced(
-    item_id: int = Query(..., description="Menu item ID"),
-    target_date: Optional[str] = Query(None, description="ISO format date"),
-    item_name: str = Query("Unknown", description="Item name"),
-    category: str = Query("Entrees", description="Item category"),
-):
-    """
-    Enhanced sales prediction with detailed factor breakdown
-
-    Shows:
-    - Predicted quantity
-    - Confidence with margin
-    - Weather sensitivity
-    - Event impact
-    - Purchasing recommendation
-    """
-    try:
-        target = datetime.fromisoformat(target_date) if target_date else None
-
-        result = enhanced_prediction_service.predict_sales_enhanced(
-            item_id=item_id, target_date=target, item_name=item_name, category=category
-        )
-
-        return result
-
-    except Exception as e:
-        return {
-            "item_id": item_id,
-            "predicted_quantity": 0,
-            "error": str(e),
-            "factors": {},
-        }
-
-
-# =============================================================================
-# USER PROFILE
-# =============================================================================
-
-
-@router.get("/user-profile")
-async def get_user_profile():
-    """Get user profile information"""
-    # TODO: Implement actual auth
-    return {
-        "name": "Manager",
-        "restaurant": "Tulsa Capstone Grill",
-        "email": "manager@tulsagrill.com",
-    }
-
-
-# =============================================================================
-# FEEDBACK ENDPOINT (for model improvement)
-# =============================================================================
-
-
-@router.post("/feedback")
-async def submit_feedback(
-    prediction_type: str,
-    prediction_id: str,
-    actual_value: float,
-    notes: Optional[str] = None,
-):
-    """
-    Submit feedback on prediction accuracy
-
-    This data can be used to retrain and improve models
-    """
-    try:
-        feedback_record = {
-            "prediction_type": prediction_type,
-            "prediction_id": prediction_id,
-            "actual_value": actual_value,
-            "notes": notes,
-            "timestamp": datetime.now().isoformat(),
-        }
-
-        # TODO: Store in database for model retraining
-        # For now, just log it
-        print(f"Feedback received: {feedback_record}")
-
-        return {
-            "success": True,
-            "message": "Thank you for your feedback!",
-            "feedback_id": f"fb_{datetime.now().timestamp()}",
-        }
-
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-
-# =============================================================================
-# HEALTH CHECK
-# =============================================================================
+        logger.error(f"Info sections fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    try:
-        # Test services
-        weather_ok = weather_service.grid_info is not None
-        events_ok = event_service.ticketmaster_key is not None
+async def health_check_new():
+    """Dashboard health check (NEW URL: /api/dashboard/health)"""
+    return {"status": "healthy", "service": "dashboard"}
 
-        return {
-            "status": "healthy",
-            "timestamp": datetime.now().isoformat(),
-            "services": {
-                "weather": "operational" if weather_ok else "degraded",
-                "events": "operational" if events_ok else "no_api_key",
-                "predictions": "operational",
-                "dashboard": "operational",
-            },
-        }
+
+# =============================================================================
+# LEGACY ENDPOINTS (OLD URLs - for backwards compatibility)
+# =============================================================================
+
+
+@legacy_router.get("/dashboard")
+async def get_full_dashboard_legacy():
+    """
+    Get complete dashboard (LEGACY URL: /dashboard)
+
+    ⚠️ DEPRECATED: Use /api/dashboard/ or /api/dashboard/dashboard instead
+    """
+    try:
+        return _get_dashboard_impl()
     except Exception as e:
-        return {"status": "unhealthy", "error": str(e)}
+        logger.error(f"Dashboard fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@legacy_router.get("/highlights")
+async def get_highlights_legacy():
+    """
+    Get dashboard highlights (LEGACY URL: /highlights)
+
+    ⚠️ DEPRECATED: Use /api/dashboard/highlights instead
+    """
+    try:
+        return _get_highlights_impl()
+    except Exception as e:
+        logger.error(f"Highlights fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@legacy_router.get("/sales-chart")
+async def get_sales_chart_legacy():
+    """
+    Get 7-day sales chart (LEGACY URL: /sales-chart)
+
+    ⚠️ DEPRECATED: Use /api/dashboard/sales-chart instead
+    """
+    try:
+        return _get_sales_chart_impl()
+    except Exception as e:
+        logger.error(f"Sales chart fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@legacy_router.get("/metrics")
+async def get_metrics_legacy():
+    """
+    Get metrics grid (LEGACY URL: /metrics)
+
+    ⚠️ DEPRECATED: Use /api/dashboard/metrics instead
+    """
+    try:
+        return _get_metrics_impl()
+    except Exception as e:
+        logger.error(f"Metrics fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@legacy_router.get("/info-sections")
+async def get_info_sections_legacy():
+    """
+    Get info sections (LEGACY URL: /info-sections)
+
+    ⚠️ DEPRECATED: Use /api/dashboard/info-sections instead
+    """
+    try:
+        return _get_info_sections_impl()
+    except Exception as e:
+        logger.error(f"Info sections fetch failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
