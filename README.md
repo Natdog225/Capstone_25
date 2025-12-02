@@ -21,6 +21,7 @@ flowchart TB
         H --> I["Login Page"]
         I --> J["Dashboard & Search"]
         J --> K["Calendar View"]
+```
 
 
 
