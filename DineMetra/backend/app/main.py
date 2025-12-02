@@ -77,12 +77,18 @@ from app.api import dashboard, predictions, websocket
 app.include_router(dashboard.router)
 app.include_router(predictions.router)
 
-# Include legacy router for backwards compatibility (if it exists)
+# Include legacy routers for backwards compatibility
+try:
+    app.include_router(dashboard.legacy_router)
+    logger.info("✅ Legacy dashboard endpoints enabled for backwards compatibility")
+except AttributeError:
+    pass
+
 try:
     app.include_router(predictions.legacy_router)
     logger.info("✅ Legacy prediction endpoints enabled for backwards compatibility")
 except AttributeError:
-    pass  # No legacy router, that's fine
+    pass
 
 app.include_router(websocket.router)
 

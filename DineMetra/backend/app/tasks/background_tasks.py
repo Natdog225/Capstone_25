@@ -57,7 +57,7 @@ class BackgroundTaskService:
         self.prediction_service = None
         try:
             from app.services.enhanced_prediction_service import (
-                get_enhanced_prediction_service,
+                enhanced_prediction_service,
             )
 
             self.prediction_service = get_enhanced_prediction_service()
