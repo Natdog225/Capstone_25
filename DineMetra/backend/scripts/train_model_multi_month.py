@@ -260,9 +260,9 @@ def train_model_from_monthly_folders(base_folder):
     }
 
     # Determine output path
-    output_path = "item_sales_model.pkl"
+    output_path = "item_sales_monthly.pkl"
     if os.path.exists("data/models"):
-        output_path = "data/models/item_sales_model.pkl"
+        output_path = "data/models/item_sales_monthly.pkl"
         print(f"✅ Found data/models directory")
 
     with open(output_path, "wb") as f:

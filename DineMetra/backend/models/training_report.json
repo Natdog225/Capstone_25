@@ -1,9 +1,9 @@
 {
-  "timestamp": "2025-12-02T16:22:16.802381",
+  "timestamp": "2025-12-02T18:20:29.888743",
   "models_trained": {
     "busyness": {
       "model_type": "RandomForestClassifier",
-      "test_accuracy": 0.9103641456582633,
+      "test_accuracy": 0.9402427637721755,
       "features": [
         "hour",
         "day_of_week",
@@ -19,38 +19,32 @@
         "weather_snowy",
         "weather_sunny"
       ],
-      "training_samples": 4283
+      "training_samples": 4284
     },
     "item_sales": {
       "model_type": "GradientBoostingRegressor",
-      "test_mae": 5.154237093914518,
-      "test_r2": 0.6022765333409307,
+      "test_mae": 5.977702375403329,
+      "test_r2": -0.021860565371099483,
       "features": [
         "day_of_week",
         "month",
         "is_weekend",
         "is_holiday",
         "historical_avg_sales",
-        "category_Alcohol",
-        "category_Appetizers",
-        "category_Beverages",
-        "category_Desserts",
-        "category_Entrees",
-        "category_Salads",
-        "category_Sides"
+        "category_NA Beverage"
       ],
-      "training_samples": 3296,
+      "training_samples": 329,
       "items_covered": [
         "Diet Coke",
         "Coke",
-        "Wings",
         "Coffee",
         "Beer",
-        "Sprite",
         "Iced Tea",
+        "Sprite",
         "Wine",
-        "French Fries",
-        "Bbq Chicken Pizza"
+        "BBQ Chicken Pizza",
+        "Pepperoni Pizza",
+        "Classic Burger"
       ]
     }
   },
@@ -58,104 +52,80 @@
     "busyness": [
       {
         "feature": "is_peak_hour",
-        "importance": 0.28698273061078283
+        "importance": 0.31057400191054974
       },
       {
         "feature": "is_dinner",
-        "importance": 0.23032092833692444
+        "importance": 0.19787769007078046
       },
       {
         "feature": "hour",
-        "importance": 0.166471614327778
+        "importance": 0.17837346709550658
       },
       {
         "feature": "is_lunch",
-        "importance": 0.15481988829073726
+        "importance": 0.14618130294378126
       },
       {
         "feature": "day_of_week",
-        "importance": 0.05551169553967744
+        "importance": 0.05596424652614709
       },
       {
         "feature": "is_weekend",
-        "importance": 0.051574868865817615
+        "importance": 0.055770250497190865
       },
       {
         "feature": "avg_party_size",
-        "importance": 0.037262379609443716
+        "importance": 0.03839455505306569
       },
       {
         "feature": "month",
-        "importance": 0.010825399540151213
+        "importance": 0.010439736611848882
       },
       {
         "feature": "weather_cloudy",
-        "importance": 0.0016855936952877642
+        "importance": 0.001971582199520375
       },
       {
         "feature": "weather_rainy",
-        "importance": 0.0015520871378578223
+        "importance": 0.0016203780642496206
       },
       {
         "feature": "weather_sunny",
-        "importance": 0.001175821264485509
+        "importance": 0.0013314265198486955
       },
       {
         "feature": "weather_snowy",
-        "importance": 0.001043205438124215
+        "importance": 0.0008863259154134541
       },
       {
         "feature": "is_holiday",
-        "importance": 0.000773787342932329
+        "importance": 0.0006150365920971152
       }
     ],
     "item_sales": [
       {
-        "feature": "historical_avg_sales",
-        "importance": 0.6545855368377747
-      },
-      {
         "feature": "day_of_week",
-        "importance": 0.2628686830001923
+        "importance": 0.8105333320632877
       },
       {
         "feature": "month",
-        "importance": 0.03752667327550275
-      },
-      {
-        "feature": "category_Entrees",
-        "importance": 0.022231417815991427
-      },
-      {
-        "feature": "category_Sides",
-        "importance": 0.0073499274150455336
+        "importance": 0.1656320873753086
       },
       {
         "feature": "is_holiday",
-        "importance": 0.005311069488908554
-      },
-      {
-        "feature": "category_Appetizers",
-        "importance": 0.003928017942544489
+        "importance": 0.013584568037999968
       },
       {
         "feature": "is_weekend",
-        "importance": 0.002600130238710802
+        "importance": 0.01025001252340381
       },
       {
-        "feature": "category_Beverages",
-        "importance": 0.0022138059741386453
-      },
-      {
-        "feature": "category_Alcohol",
-        "importance": 0.0013847380111908177
-      },
-      {
-        "feature": "category_Desserts",
+        "feature": "historical_avg_sales",
         "importance": 0.0
       },
       {
-        "feature": "category_Salads",
+        "feature": "category_NA Beverage",
         "importance": 0.0
       }
     ]
