@@ -1,4 +1,4 @@
-/* Login.css - DineMetra Dinner Plate Logo Styling */
+/* Login.css - Dark Theme Unified */
 
 /* Dinner Plate Logo Wrapper */
 .dinner-plate-logo {
@@ -9,7 +9,7 @@
 .dinner-plate {
     width: 260px;
     height: 260px;
-    background: #ffffff;
+    background: var(--white);
     border-radius: 50%;
     box-shadow: 
         0 8px 20px rgba(0, 0, 0, 0.15),
@@ -19,7 +19,7 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    border: 12px solid #ffffff;
+    border: 12px solid #1E1E1E;
     box-sizing: border-box;
 }
 
@@ -30,7 +30,7 @@
     width: 90%;
     height: 90%;
     border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 185, 23, 0.2);
     pointer-events: none;
 }
 
@@ -48,7 +48,7 @@
     .dinner-plate {
         width: 220px;
         height: 220px;
-        border: 10px solid #ffffff;
+        border: 10px solid #1E1E1E;
     }
 }
 
@@ -56,6 +56,61 @@
     .dinner-plate {
         width: 180px;
         height: 180px;
-        border: 8px solid #ffffff;
+        border: 8px solid #1E1E1E;
     }
+}
+
+/* Login page specific dark theme */
+.login-container {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  background: #1E1E1E;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 185, 23, 0.2);
+}
+
+.login-title {
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-form input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 185, 23, 0.2);
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 6px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: #ffb917;
+  box-shadow: 0 0 0 3px rgba(255, 185, 23, 0.2);
+}
+
+.login-form button {
+  background: #ffb917;
+  color: #1E1E1E;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.login-form button:hover {
+  background: #e5a414;
 }

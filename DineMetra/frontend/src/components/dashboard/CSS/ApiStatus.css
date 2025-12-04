@@ -1,0 +1,132 @@
+/* ApiStatus.css - Dark Theme Unified */
+
+.api-status-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #1E1E1E;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 185, 23, 0.2);
+  color: #ffffff;
+}
+
+.api-status-widget:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+  border-color: rgba(255, 185, 23, 0.4);
+}
+
+.api-status-widget:hover .health-details {
+  display: block;
+}
+
+.status-icon {
+  flex-shrink: 0;
+}
+
+.status-icon.healthy {
+  color: #28a745;
+}
+
+.status-icon.warning {
+  color: #ffc107;
+}
+
+.status-icon.error {
+  color: #dc3545;
+}
+
+.status-icon.checking {
+  color: #6c757d;
+}
+
+.status-text {
+  font-weight: 500;
+}
+
+.status-text.healthy {
+  color: #28a745;
+}
+
+.status-text.warning {
+  color: #ffc107;
+}
+
+.status-text.error {
+  color: #dc3545;
+}
+
+.status-text.checking {
+  color: #6c757d;
+}
+
+.last-checked {
+  color: #6c757d;
+  font-size: 0.75rem;
+  margin-left: 4px;
+}
+
+.health-details {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background: #2a2a2a;
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  min-width: 220px;
+  display: none;
+  font-size: 0.8rem;
+  border: 1px solid rgba(255, 185, 23, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.model-status {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.model-name {
+  color: #cccccc;
+}
+
+.model-value {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.model-value.healthy {
+  color: #28a745;
+}
+
+.model-value.unhealthy {
+  color: #dc3545;
+}
+
+.last-trained {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #333;
+  color: #aaa;
+  font-size: 0.75rem;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

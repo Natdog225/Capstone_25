@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BarChart,
   Bar,
@@ -6,39 +6,89 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer
 } from 'recharts';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
+import { dinemetraAPI } from '../../services/dinemetraService.js';
 import './CSS/Chartsection.css';
 
-const ChartSection = () => {
-  // Sample data based on the sketch
-  const data = [
-    { day: 'Mon', thisWeek: 145, pastData: 120, actual: 138 },
-    { day: 'Tue', thisWeek: 168, pastData: 145, actual: 160 },
-    { day: 'Wed', thisWeek: 135, pastData: 130, actual: 142 },
-    { day: 'Thu', thisWeek: 178, pastData: 165, actual: 170 },
-    { day: 'Fri', thisWeek: 220, pastData: 195, actual: 210 },
-    { day: 'Sat', thisWeek: 265, pastData: 240, actual: 255 },
-    { day: 'Sun', thisWeek: 245, pastData: 225, actual: 238 }
-  ];
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="custom-tooltip">
+        <p className="tooltip-label">{label}</p>
+        {payload.map((entry, index) => (
+          <p key={index} style={{ color: entry.color }}>
+            {entry.name}: ${entry.value}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="custom-tooltip">
-          <p className="tooltip-label">{label}</p>
-          {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }}>
-              {entry.name}: ${entry.value}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+const ChartSection = ({ weekRange = 'this-week' }) => {
+  const [chartData, setChartData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        setLoading(true);
+        const data = await dinemetraAPI.getSalesChart(weekRange);
+        setChartData(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load chart data:', err);
+        setError('Failed to load chart data');
+        setChartData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChartData();
+  }, [weekRange]);
+
+  // Calculate dynamic stats from real data
+  const calculateStats = () => {
+  // Check if it's actually an array
+  if (!Array.isArray(chartData) || chartData.length === 0) {
+    return { variance: 0 };
+  }
+  
+  try {
+    const thisWeekTotal = chartData.reduce((sum, d) => sum + (d.thisWeek || 0), 0);
+    const pastWeekTotal = chartData.reduce((sum, d) => sum + (d.pastData || 0), 0);
+    const variance = pastWeekTotal > 0 ? ((thisWeekTotal - pastWeekTotal) / pastWeekTotal * 100) : 0;
+    
+    return { variance };
+  } catch (error) {
+    console.error('Error calculating stats:', error);
+    return { variance: 0 };
+  }
+};
+
+  const { variance } = calculateStats();
+
+  if (loading) {
+    return (
+      <div className="chart-section card loading">
+        <div className="loading-spinner">Loading chart data...</div>
+      </div>
+    );
+  }
+
+  if (error || !chartData) {
+    return (
+      <div className="chart-section card error">
+        <p className="error-message">⚠️ {error || 'No chart data available'}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="chart-section card">
@@ -46,8 +96,10 @@ const ChartSection = () => {
         <h2 className="section-title">Sales Overview</h2>
         <div className="chart-stats">
           <div className="stat-item">
-            <TrendingUp size={18} className="stat-icon up" />
-            <span className="stat-value up">+12%</span>
+            <TrendingUp size={18} className={`stat-icon ${variance >= 0 ? 'up' : 'down'}`} />
+            <span className={`stat-value ${variance >= 0 ? 'up' : 'down'}`}>
+              {variance >= 0 ? '+' : ''}{variance.toFixed(1)}%
+            </span>
             <span className="stat-label">vs last week</span>
           </div>
         </div>
@@ -70,7 +122,7 @@ const ChartSection = () => {
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
-          data={data}
+          data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
