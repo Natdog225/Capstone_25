@@ -1,0 +1,25 @@
+============================================================
+DINEMETRA - REAL DATA PROCESSING SUMMARY
+============================================================
+
+📊 ORDERS DATA:
+   Total Orders: 9,624
+   Date Range: 2025-02-01 to 2025-05-31
+   Total Revenue: $717,134.67
+   Average Check: $74.52
+   Average Party Size: 2.9
+
+⏱️  WAIT TIMES DATA:
+   Total Logs: 4,344
+   Avg Quoted Wait: 12.4 min
+   Avg Actual Wait: 13.2 min
+   Avg Accuracy: 2.5 min error
+
+📅 BUSIEST DAYS:
+   2025-05-10: 218.0 orders, $19610.86
+   2025-05-02: 187.0 orders, $14948.99
+   2025-03-07: 148.0 orders, $10476.16
+   2025-02-01: 142.0 orders, $10924.60
+   2025-04-04: 130.0 orders, $9441.28
+
+============================================================

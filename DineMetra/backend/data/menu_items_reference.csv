@@ -1,0 +1,109 @@
+name,category,price,weight,item_id
+2 Easy Eggs,Food,3.0,11.0,1
+Adult Popcorn Chicken,Food,9.025,368.0,2
+Beer Battered Cod Brioche,Food,11.5,18.0,3
+Beer Battered Cod Rice Bowl,Food,14.3,54.0,4
+Beer Battered Cod Salad,Food,13.45,2.0,5
+Bottled Water,NA Beverage,2.0,124.0,6
+Calamari App,Food,18.026666666666667,124.0,7
+Calamari Banh Mi,Food,14.5,82.0,8
+Calamari Salad,Food,14.846666666666666,13.0,9
+Candied Bacon,Food,4.5,24.0,10
+Cans,Beer,5.831666666666667,580.0,11
+Caramel White Choc Cookie,Food,3.5,515.0,12
+Children's Popcorn Chicken,Food,5.983333333333333,563.0,13
+Chocolate Pretzel Cookie,Food,3.5,751.0,14
+Cilantro Pesto Aioli,Food,1.0,44.0,15
+Cod,Food,6.0,6.0,16
+Crop Hoodie Med,Retail,15.0,2.0,17
+Crop Hoodie XL,Retail,15.0,2.0,18
+Drafts,Beer,6.251666666666666,440.0,19
+Easy Egg,Food,1.5,43.0,20
+Extra Cheese,Food,1.0,2.0,21
+Fried Chicken,Food,3.0,19.0,22
+Fried Chicken Banh Mi,Food,11.655000000000001,1073.0,23
+Fried Chicken Bowl,Food,14.335,1475.0,24
+Fried Chicken Brioche,Food,10.025,488.0,25
+Fried Chicken Salad,Food,11.924999999999999,179.0,26
+Fried Vegan Chik'n Banh Mi,Food,11.726666666666667,367.0,27
+Fried Vegan Chik'n Salad,Food,12.511666666666665,76.0,28
+Fritter App,Food,6.541666666666667,149.0,29
+Fritter Banh Mi,Food,10.586666666666668,197.0,30
+Fritter CATER,Food,2.5,64.0,31
+Fritter Salad,Food,10.961666666666666,112.0,32
+Full Baguette,Food,1.0,136.0,33
+Full Banh Mi CATER,Food,12.0,95.0,34
+Garlic Shrimp,Food,6.5,16.0,35
+Ginger Fritters,Food,3.0,28.0,36
+Iced Tea,NA Beverage,2.9500000000000006,231.0,37
+Jalapeno Pesto Meatballs,Food,4.0,24.0,38
+Kimchi,Food,1.0,206.0,39
+Kimchi Pickles,Food,1.0,32.0,40
+Kimchi Vinaigrette,Food,1.0,8.0,41
+Korean Chili Peanuts,Food,1.5,10.0,42
+Kung Pao Pork,Food,4.0,21.0,43
+Kung Pao Pork Salad,Food,11.061666666666667,263.0,44
+LW Thai Green Curry (VEGAN),Food,15.983333333333334,77.0,45
+Large Kimchi Fry,Food,13.378333333333332,1702.0,46
+Large Plain Fry,Food,6.3,237.0,47
+Lemon Blueberry Cookie,Food,3.5,440.0,48
+Meatball App,Food,7.06,17.0,49
+Meatball Banh Mi,Food,11.78,32.0,50
+Meatball Salad,Food,11.55,8.0,51
+Pesto Banh Mi,Food,10.714999999999998,745.0,52
+Pesto Chicken,Food,3.0,56.0,53
+Pesto Chicken Salad,Food,11.021666666666667,373.0,54
+Pesto Vinaigrette,Food,1.0,8.0,55
+Plain Rice Bowl,Food,11.946666666666665,31.0,56
+Plain Salad,Food,13.478,21.0,57
+Pork Banh Mi,Food,10.811666666666667,2472.0,58
+Portobello Banh Mi,Food,10.981666666666667,163.0,59
+Portobello Salad,Food,11.166666666666666,52.0,60
+Ranch,Food,1.0,6.0,61
+Reeses Cookie,Food,3.5,392.0,62
+Rice Bar CATER,Food,13.0,111.0,63
+Roasted Jalapeno  Aioli,Food,1.0,45.0,64
+SODA CAN,NA Beverage,1.5,6.0,65
+Salad Bar CATER,Food,13.0,50.0,66
+Scoop Fried Rice,Food,5.0,127.0,67
+Shrimp Banh Mi,Food,12.86,306.0,68
+Shrimp Salad,Food,13.026666666666666,123.0,69
+Side Calamari,Food,7.5,3.0,70
+Side Miso Gochujang,Food,1.0,1.0,71
+Side Vegan Chik'n,Food,5.0,5.0,72
+Slaw,Food,1.0,16.0,73
+Small Kimchi Fry,Food,9.645000000000001,2346.0,74
+Small Plain Fry,Food,4.185,753.0,75
+Soda,NA Beverage,2.9500000000000006,5684.0,76
+Soft Serve,Food,6.0,269.0,77
+Soy Dijon Portobello,Food,4.5,4.0,78
+Soy Packet,Food,0.0,11.0,79
+Spring Roll CATER,Food,2.5,64.0,80
+Spring Rolls,Food,6.52,895.0,81
+Sweet Chili Sauce,Food,1.0,10.0,82
+Thai Chili Aioli,Food,1.0,67.0,83
+The Balls,Food,14.1,53.0,84
+The Fritz,Food,13.36,191.0,85
+The Jam,Food,15.066666666666668,1553.0,86
+The Pao,Food,13.405000000000001,3047.0,87
+The Pesto,Food,13.443333333333333,2235.0,88
+The Shrimp,Food,15.418333333333335,1181.0,89
+The Shroom,Food,14.655000000000001,344.0,90
+The Squid,Food,17.275000000000002,268.0,91
+Thumbs Wolf Sticker,Retail,1.0,1.0,92
+To Go Utensils,Food,0.0,43.0,93
+VEGAN Fried Chik'n Brioche,Food,10.036666666666667,167.0,94
+Vegan Fried Chix (NOT VEGAN) Rice Bowl,Food,13.991666666666665,28.0,95
+Vegan Thai,Food,1.0,4.0,96
+Veggie Burger,Food,10.781666666666666,40.0,97
+WATER CUP NO MEAL,NA Beverage,1.0,1.0,98
+Wonton Chips,Food,1.5,90.0,99
+XL Shirt,Retail,13.33,3.0,100
+Yin Yang 2xl,Retail,15.0,2.0,101
+Yin Yang Hoodie M,Retail,15.0,1.0,102
+Yin Yang Hoodie XL,Retail,15.0,2.0,103
+Yin Yang Hoodie Xs,Retail,15.0,1.0,104
+Yin Yang Sticker,Retail,2.0,3.0,105
+small crew neck,Retail,15.0,1.0,106
+water cup,NA Beverage,0.0,3971.0,107
+xxl neon hoodie,Retail,15.0,2.0,108
