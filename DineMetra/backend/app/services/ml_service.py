@@ -324,7 +324,7 @@ class ItemSalesPredictor:
 
     def __init__(self):
         self.model = None
-        self.model_path = "data/models/item_sales_model.pkl"
+        self.model_path = "models/item_sales_daily_full.pkl"
         self.label_encoder_item = None
         self.label_encoder_category = None
         self.feature_columns = []
