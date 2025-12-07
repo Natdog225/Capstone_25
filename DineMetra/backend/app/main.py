@@ -40,7 +40,6 @@ async def lifespan(app: FastAPI):
     logger.info("📖 API Docs: http://localhost:8000/docs")
     logger.info("✅ CSV Upload API enabled (live demo feature)")
 
-
     yield
 
     # Shutdown
@@ -75,13 +74,14 @@ app.add_middleware(
 # Import routers - import only what exists
 from app.api import dashboard, predictions, websocket
 from app.api.upload import router as upload_router
-
+from app.api.monitoring import router as monitoring_router
 
 
 # Include core routers (always present)
 app.include_router(dashboard.router)
 app.include_router(predictions.router)
 app.include_router(upload_router, prefix="/api/upload", tags=["Upload"])
+app.include_router(monitoring_router, prefix="/api/monitoring", tags=["Monitoring"])
 
 
 # Include legacy routers for backwards compatibility

@@ -108,3 +108,135 @@ async def get_data_health():
     except Exception as e:
         print(f"❌ Data Health Error: {e}")
         return {"error": "Could not read data health"}
+
+
+@router.get("/health")
+async def system_health():
+    """
+    Complete system health check
+    Returns status of all models, database, and services
+    """
+    import os
+    from pathlib import Path
+    from datetime import datetime
+    import pickle
+    
+    def check_model_file(model_path: str):
+        """Check if a model file exists and get its info"""
+        path = Path(model_path)
+        
+        if not path.exists():
+            return {
+                'status': 'missing',
+                'path': model_path,
+                'exists': False
+            }
+        
+        try:
+            stats = path.stat()
+            
+            # Try to load model
+            with open(path, 'rb') as f:
+                model_data = pickle.load(f)
+            
+            model_type = 'unknown'
+            features = 'unknown'
+            
+            if isinstance(model_data, dict):
+                if 'model' in model_data:
+                    model_type = type(model_data['model']).__name__
+                if 'features' in model_data:
+                    features = len(model_data['features']) if isinstance(model_data['features'], list) else model_data['features']
+            
+            return {
+                'status': 'healthy',
+                'path': model_path,
+                'exists': True,
+                'size_mb': round(stats.st_size / 1024 / 1024, 2),
+                'last_modified': datetime.fromtimestamp(stats.st_mtime).isoformat(),
+                'model_type': model_type,
+                'features': features
+            }
+            
+        except Exception as e:
+            return {
+                'status': 'error',
+                'path': model_path,
+                'error': str(e)
+            }
+    
+    # Check ML Models
+    models = {
+        'wait_time': check_model_file('models/wait_time_model.pkl'),
+        'busyness': check_model_file('models/busyness_model.pkl'),
+        'item_sales': check_model_file('data/models/item_sales_model.pkl'),
+    }
+    
+    healthy_models = sum(1 for m in models.values() if m['status'] == 'healthy')
+    total_models = len(models)
+    
+    # Check database
+    db_status = 'unknown'
+    db_records = {}
+    
+    try:
+        from app.database.database import SessionLocal, check_db_connection
+        from app.models.database_models import MenuItem, Order, OrderItem, WaitTime
+        
+        if check_db_connection():
+            db_status = 'connected'
+            
+            db = SessionLocal()
+            try:
+                db_records = {
+                    'menu_items': db.query(MenuItem).count(),
+                    'orders': db.query(Order).count(),
+                    'order_items': db.query(OrderItem).count(),
+                    'wait_times': db.query(WaitTime).count()
+                }
+            finally:
+                db.close()
+        else:
+            db_status = 'disconnected'
+            
+    except Exception as e:
+        db_status = f'error: {str(e)}'
+    
+    # Check WebSocket
+    ws_status = 'unknown'
+    ws_connections = 0
+    
+    try:
+        from app.websocket.manager import manager
+        ws_connections = len(manager.active_connections)
+        ws_status = 'active'
+    except Exception as e:
+        ws_status = f'error: {str(e)}'
+    
+    # Overall system status
+    overall_status = 'healthy' if (
+        healthy_models == total_models and
+        db_status == 'connected' and
+        ws_status == 'active'
+    ) else 'degraded' if healthy_models > 0 else 'unhealthy'
+    
+    return {
+        'status': overall_status,
+        'timestamp': datetime.now().isoformat(),
+        'models': {
+            'status': f'{healthy_models}/{total_models} healthy',
+            'details': models
+        },
+        'database': {
+            'status': db_status,
+            'records': db_records
+        },
+        'websocket': {
+            'status': ws_status,
+            'active_connections': ws_connections
+        },
+        'services': {
+            'api': 'running',
+            'background_tasks': 'running'
+        }
+    }
