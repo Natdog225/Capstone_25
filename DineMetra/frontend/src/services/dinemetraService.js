@@ -43,7 +43,7 @@ export const dinemetraAPI = {
   },
 
   async getModelPerformance() {
-    const { data } = await api.get('/api/monitoring/health');
+    const { data } = await api.get('/api/monitoring/model-performance');
     return data;
   },
 
