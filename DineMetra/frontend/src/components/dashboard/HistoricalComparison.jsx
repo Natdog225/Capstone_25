@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { History, Clock, ShoppingCart, Users, AlertCircle, Calendar } from 'lucide-react';
+import { History, Clock, ShoppingCart, Users, AlertCircle, Calendar, RefreshCw } from 'lucide-react';
 import { dinemetraAPI } from '../../services/dinemetraService.js';
 import './CSS/HistoricalComparison.css';
 
@@ -8,12 +8,15 @@ const getData = (response) => response?.data || {};
 const formatValue = (value, fallback = 'N/A') => (value === null || value === undefined || value === '') ? fallback : value;
 const formatPercent = (value) => (value === null || value === undefined) ? null : parseFloat(value).toFixed(1);
 
-const HistoricalComparison = ({ dateRange }) => {
+const HistoricalComparison = ({ dateRange, onDateRangeChange }) => {
   const [historicalData, setHistoricalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('overview');
   const [trendsWeeks, setTrendsWeeks] = useState(8);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     if (dateRange?.startDate && dateRange?.endDate) {
@@ -56,6 +59,44 @@ const HistoricalComparison = ({ dateRange }) => {
     setTrendsWeeks(parseInt(weeks));
   };
 
+  const handleDateChange = (field, value) => {
+    onDateRangeChange({ ...dateRange, [field]: value });
+  };
+
+  const handleQuickSelect = (days) => {
+    const endDate = new Date();
+    const startDate = new Date();
+    
+    if (days === 'month') {
+      startDate.setMonth(startDate.getMonth() - 1);
+    } else if (days === 'week') {
+      startDate.setDate(startDate.getDate() - 7);
+    } else if (days === 'today') {
+      // Keep both as today
+    } else {
+      startDate.setDate(startDate.getDate() - days);
+    }
+    
+    onDateRangeChange({
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0]
+    });
+  };
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    onDateRangeChange({ ...dateRange });
+    setTimeout(() => setIsRefreshing(false), 1000);
+  };
+
+  const calculateDaysBetween = () => {
+    const start = new Date(dateRange.startDate);
+    const end = new Date(dateRange.endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays + 1;
+  };
+
   if (loading) {
     return (
       <div className="historical-comparison loading">
@@ -81,10 +122,89 @@ const HistoricalComparison = ({ dateRange }) => {
   const orderSummary = summary.orders || {};
   const waitTimeSummary = summary.wait_times || {};
   const totalRecords = (orderSummary.total_records || 0) + (waitTimeSummary.total_records || 0);
-  const summaryDateRange = orderSummary.date_range || waitTimeSummary.date_range || {};
 
   return (
     <div className="historical-comparison">
+      {/* Date Range Selector - Now at top of Historical Analysis */}
+      <div className="date-range-container">
+        <div className="date-range-inputs">
+          <div className="date-input-group">
+            <label htmlFor="start-date" className="date-label">From</label>
+            <div className="date-input-wrapper">
+              <Calendar size={16} className="date-icon" />
+              <input 
+                id="start-date"
+                type="date" 
+                value={dateRange.startDate}
+                onChange={(e) => handleDateChange('startDate', e.target.value)}
+                max={dateRange.endDate}
+                className="date-input"
+              />
+            </div>
+          </div>
+          
+          <span className="date-separator">→</span>
+          
+          <div className="date-input-group">
+            <label htmlFor="end-date" className="date-label">To</label>
+            <div className="date-input-wrapper">
+              <Calendar size={16} className="date-icon" />
+              <input 
+                id="end-date"
+                type="date" 
+                value={dateRange.endDate}
+                onChange={(e) => handleDateChange('endDate', e.target.value)}
+                min={dateRange.startDate}
+                max={today}
+                className="date-input"
+              />
+            </div>
+          </div>
+          
+          <button 
+            onClick={handleRefresh}
+            className="refresh-date-btn"
+            disabled={isRefreshing}
+            title="Refresh data"
+          >
+            <RefreshCw size={18} className={isRefreshing ? 'spinning' : ''} />
+          </button>
+        </div>
+        
+        {/* Quick Select Buttons */}
+        <div className="quick-select-buttons">
+          <button 
+            onClick={() => handleQuickSelect('today')}
+            className="quick-select-btn"
+          >
+            Today
+          </button>
+          <button 
+            onClick={() => handleQuickSelect('week')}
+            className="quick-select-btn"
+          >
+            Last 7 Days
+          </button>
+          <button 
+            onClick={() => handleQuickSelect(30)}
+            className="quick-select-btn"
+          >
+            Last 30 Days
+          </button>
+          <button 
+            onClick={() => handleQuickSelect('month')}
+            className="quick-select-btn"
+          >
+            Last Month
+          </button>
+        </div>
+        
+        {/* Display selected range info */}
+        <div className="date-range-info">
+          <span className="range-days">{calculateDaysBetween()} days selected</span>
+        </div>
+      </div>
+
       <div className="comparison-header">
         <div className="header-main">
           <History size={28} className="header-icon" />

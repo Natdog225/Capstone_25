@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
+import Sidebar from './Sidebar';
 import ChartSection from './Chartsection';
 import HighlightCards from './Highlightcards';
 import MetricsGrid from './Metricsgrid';
 import InfoSections from './Infosections';
+import SalesInfoCards from './SalesInfoCards';
+import LaborPrediction from './LaborPrediction';
 import PredictionsPanel from '../PredictionsPanel';
-import ApiStatus from './ApiStatus'; // Add this import
+import ApiStatus from './ApiStatus';
 import { auth } from '../../firebase';
 import { signOut } from 'firebase/auth';
 import { dinemetraAPI } from '../../services/dinemetraService';
@@ -28,6 +31,8 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiStatus, setApiStatus] = useState('connecting');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('sales-overview');
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -74,6 +79,55 @@ const Dashboard = () => {
     }
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+  };
+
+  // Render content based on active tab
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'sales-overview':
+        return (
+          <>
+            <HighlightCards dateRange={dateRange} highlights={dashboardData.highlights} />
+            <ChartSection dateRange={dateRange} />
+            <SalesInfoCards dateRange={dateRange} />
+          </>
+        );
+      
+      case 'sales-metrics':
+        return <MetricsGrid dateRange={dateRange} />;
+      
+      case 'historical-analysis':
+        return <InfoSections dateRange={dateRange} onDateRangeChange={handleDateRangeChange} />;
+      
+      case 'ai-predictions':
+        return (
+          <>
+            <PredictionsPanel />
+            <LaborPrediction dateRange={dateRange} />
+          </>
+        );
+      
+      default:
+        return (
+          <>
+            <HighlightCards dateRange={dateRange} highlights={dashboardData.highlights} />
+            <ChartSection dateRange={dateRange} />
+            <SalesInfoCards dateRange={dateRange} />
+          </>
+        );
+    }
+  };
+
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -102,19 +156,21 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
+      <Sidebar 
+        isOpen={sidebarOpen}
+        onClose={closeSidebar}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
+      
       <div className="container">
         <Header 
-          dateRange={dateRange}
-          onDateRangeChange={handleDateRangeChange}
           onLogout={handleLogout}
+          onMenuClick={toggleSidebar}
         />
         
         <main className="dashboard-main">
-          <HighlightCards dateRange={dateRange} highlights={dashboardData.highlights} />
-          <ChartSection dateRange={dateRange} />
-          <MetricsGrid dateRange={dateRange} />
-          <PredictionsPanel />
-          <InfoSections dateRange={dateRange} />
+          {renderTabContent()}
         </main>
         
         <footer className="dashboard-footer">

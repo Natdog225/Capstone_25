@@ -54,22 +54,22 @@ const ChartSection = ({ weekRange = 'this-week' }) => {
 
   // Calculate dynamic stats from real data
   const calculateStats = () => {
-  // Check if it's actually an array
-  if (!Array.isArray(chartData) || chartData.length === 0) {
-    return { variance: 0 };
-  }
-  
-  try {
-    const thisWeekTotal = chartData.reduce((sum, d) => sum + (d.thisWeek || 0), 0);
-    const pastWeekTotal = chartData.reduce((sum, d) => sum + (d.pastData || 0), 0);
-    const variance = pastWeekTotal > 0 ? ((thisWeekTotal - pastWeekTotal) / pastWeekTotal * 100) : 0;
+    // Check if it's actually an array
+    if (!Array.isArray(chartData) || chartData.length === 0) {
+      return { variance: 0 };
+    }
     
-    return { variance };
-  } catch (error) {
-    console.error('Error calculating stats:', error);
-    return { variance: 0 };
-  }
-};
+    try {
+      const thisWeekTotal = chartData.reduce((sum, d) => sum + (d.thisWeek || 0), 0);
+      const pastWeekTotal = chartData.reduce((sum, d) => sum + (d.pastData || 0), 0);
+      const variance = pastWeekTotal > 0 ? ((thisWeekTotal - pastWeekTotal) / pastWeekTotal * 100) : 0;
+      
+      return { variance };
+    } catch (error) {
+      console.error('Error calculating stats:', error);
+      return { variance: 0 };
+    }
+  };
 
   const { variance } = calculateStats();
 
@@ -125,15 +125,15 @@ const ChartSection = ({ weekRange = 'this-week' }) => {
           data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
           <XAxis 
             dataKey="day" 
-            tick={{ fill: '#666' }}
-            axisLine={{ stroke: '#e0e0e0' }}
+            tick={{ fill: '#ffffff' }}
+            axisLine={{ stroke: 'rgba(255, 255, 255, 0.2)' }}
           />
           <YAxis 
-            tick={{ fill: '#666' }}
-            axisLine={{ stroke: '#e0e0e0' }}
+            tick={{ fill: '#ffffff' }}
+            axisLine={{ stroke: 'rgba(255, 255, 255, 0.2)' }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Bar 
