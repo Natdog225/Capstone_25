@@ -9,65 +9,47 @@ from datetime import datetime
 from typing import Dict, List, Optional
 import pickle
 import os
+import logging
 
-# === NEW IMPORTS: Connect to the outside world ===
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# === External Service Imports ===
 try:
     from app.services.event_service import EventService
     from app.services.weather_service import WeatherService
 except ImportError:
-    print("⚠️ Could not import external services. Running in offline mode.")
+    logger.warning("⚠️ Could not import external services. Running in offline mode.")
     EventService = None
     WeatherService = None
 
 
 class WaitTimePredictor:
-    """
-    Predicts restaurant wait times based on:
-    - Party size, Time, Day, Month, Occupancy
-    - Learned Weather Impact (Model-driven)
-    - Real-time Events (Heuristic-driven)
-    """
-
     def __init__(self):
         self.model = None
-        self.model_path = "models/wait_time_model.pkl"
+        self.feature_names = []
+        # Try both paths
+        paths = ["models/wait_time_model.pkl", "data/models/wait_time_model.pkl"]
+        for p in paths:
+            if os.path.exists(p):
+                self.load_model(p)
+                break
 
         self.event_service = EventService() if EventService else None
-        self.weather_service = WeatherService() if WeatherService else None
 
-        # MUST MATCH train_models.py EXACTLY (Order matters!)
-        self.feature_columns = [
-            "party_size",
-            "hour_of_day",
-            "day_of_week",
-            "month",
-            "current_table_occupancy_pct",
-            "current_party_count",
-            "is_weekend",
-            "is_peak_hour",
-            "is_lunch",
-            # Weather comes here in the training script
-            "weather_rainy",
-            "weather_snowy",
-            "weather_cloudy",
-            "weather_sunny",
-            "is_dinner",
-            "occupancy_low",
-            "occupancy_high",
-            "party_small",
-            "party_large",
-        ]
-
-    def load_model(self):
-        """Load pre-trained model from disk"""
-        if os.path.exists(self.model_path):
-            with open(self.model_path, "rb") as f:
+    def load_model(self, path):
+        try:
+            with open(path, "rb") as f:
                 data = pickle.load(f)
-                self.model = data["model"]
-            print(f"✓ Wait time model loaded")
-        else:
-            print("⚠ No trained model found. Using baseline prediction.")
-            self.model = None
+                if isinstance(data, dict):
+                    self.model = data.get("model")
+                    self.feature_names = data.get("features", [])
+                else:
+                    self.model = data
+            logger.info(f"✓ Wait time model loaded from {path}")
+        except Exception as e:
+            logger.error(f"Failed to load wait time model: {e}")
 
     def predict(
         self,
@@ -77,270 +59,162 @@ class WaitTimePredictor:
         external_factors: Optional[Dict] = None,
     ) -> Dict:
         """
-        Predict wait time.
-        Auto-fetches Weather & Events if not provided.
+        Predict wait time using the Gradient Boosting model.
         """
-
-        # === 1. Fetch External Data ===
-        event_impact = 0
-        weather_condition = "sunny"  # Default
-
-        if external_factors:
-            # Manual overrides
-            event_impact = external_factors.get("event_impact_minutes", 0)
-            if "test_weather_condition" in external_factors:
-                weather_condition = external_factors["test_weather_condition"]
-        else:
-            # Auto-fetch Events (Heuristic)
-            try:
-                if self.event_service:
-                    event_impact = self.event_service.calculate_impact(timestamp)
-            except Exception:
-                pass
-
-            # Auto-fetch Weather String (For the Model)
-            try:
-                if self.weather_service:
-                    forecast = self.weather_service.get_forecast(timestamp)
-                    # We need the string like "Rain", "Clear", "Snow"
-                    if forecast:
-                        weather_condition = forecast.get("shortForecast", "sunny")
-            except Exception:
-                pass
-
-        # === 2. Manual One-Hot Encoding for Weather ===
-        # The model doesn't understand "Rain", it understands [1, 0, 0, 0]
-        w = weather_condition.lower()
-        w_rainy = 1 if ("rain" in w or "drizzle" in w or "storm" in w) else 0
-        w_snowy = 1 if ("snow" in w or "ice" in w or "blizzard" in w) else 0
-        w_cloudy = 1 if ("cloud" in w or "overcast" in w or "fog" in w) else 0
-        # If none of the bad stuff, assume sunny/clear
-        w_sunny = 1 if (w_rainy == 0 and w_snowy == 0 and w_cloudy == 0) else 0
-
-        # === 3. Prepare Features ===
-        hour = timestamp.hour
-        day = timestamp.weekday()
-        month = timestamp.month
-        est_party_count = int((current_occupancy / 100) * 30)
-
-        # Derived features logic
-        is_weekend = 1 if day in [5, 6] else 0
-        is_peak = 1 if hour in [11, 12, 13, 17, 18, 19, 20] else 0
-        is_lunch = 1 if hour in [11, 12, 13] else 0
-        is_dinner = 1 if hour in [17, 18, 19, 20] else 0
-        occupancy_low = 1 if current_occupancy < 50 else 0
-        occupancy_high = 1 if current_occupancy >= 75 else 0
-        party_small = 1 if party_size <= 2 else 0
-        party_large = 1 if party_size >= 6 else 0
-
-        # Construct the DataFrame in EXACT order
-        features = pd.DataFrame(
-            [
-                [
-                    party_size,
-                    hour,
-                    day,
-                    month,
-                    current_occupancy,
-                    est_party_count,
-                    is_weekend,
-                    is_peak,
-                    is_lunch,
-                    w_rainy,
-                    w_snowy,
-                    w_cloudy,
-                    w_sunny,
-                    is_dinner,
-                    occupancy_low,
-                    occupancy_high,
-                    party_small,
-                    party_large,
-                ]
-            ],
-            columns=self.feature_columns,
+        # 1. Base Logic (Heuristic) fallback if model fails or is missing
+        base_heuristic = (
+            5 + (max(0, party_size - 4) * 2) + (max(0, current_occupancy - 70) / 2)
         )
 
-        # === 4. Predict ===
-        if self.model is None:
-            return self._baseline_prediction(party_size, hour, current_occupancy)
+        if not self.model:
+            return {
+                "predicted_wait_minutes": int(base_heuristic),
+                "confidence": 0.5,
+                "factors": {"note": "Using baseline logic (model missing)"},
+            }
 
         try:
-            base_prediction = int(self.model.predict(features)[0])
+            # 2. Prepare Features (Must match train_models_final.py exactly)
+            # Features: ['party_size', 'hour', 'day', 'occupancy', 'busy_hour', 'high_occ', 'interaction']
 
-            # Only add Event impact manually.
-            # Weather impact is now BAKED INTO base_prediction by the model!
-            total_wait = base_prediction + int(event_impact)
+            hour = timestamp.hour
+            day = timestamp.weekday()
 
-            confidence = self._calculate_confidence(party_size, current_occupancy)
+            # Interaction features
+            busy_hour = 1 if hour in [18, 19, 20] else 0
+            high_occ = 1 if current_occupancy > 80 else 0
+            interaction = party_size * current_occupancy
+
+            features = pd.DataFrame(
+                [
+                    [
+                        party_size,
+                        hour,
+                        day,
+                        current_occupancy,
+                        busy_hour,
+                        high_occ,
+                        interaction,
+                    ]
+                ],
+                columns=[
+                    "party_size",
+                    "hour",
+                    "day",
+                    "occupancy",
+                    "busy_hour",
+                    "high_occ",
+                    "interaction",
+                ],
+            )
+
+            # 3. Predict
+            pred = self.model.predict(features)[0]
+
+            # Clamp to realistic values (never negative)
+            final_wait = max(0, int(pred))
+
+            # Get event impact (heuristic addition)
+            event_impact = 0
+            if self.event_service:
+                event_impact = self.event_service.calculate_impact(timestamp)
 
             return {
-                "predicted_wait_minutes": max(0, total_wait),
-                "confidence": confidence,
+                "predicted_wait_minutes": final_wait + event_impact,
+                "confidence": 0.85,  # Gradient boosting is usually confident
                 "factors": {
                     "party_size": party_size,
                     "occupancy": current_occupancy,
-                    "weather": weather_condition,
-                    "event_impact_minutes": int(event_impact),
-                    "season": "Holiday" if month in [11, 12] else "Regular",
+                    "model_base": final_wait,
+                    "event_add": event_impact,
                 },
             }
+
         except Exception as e:
-            print(f"Prediction Error: {e}")
-            return self._baseline_prediction(party_size, hour, current_occupancy)
-
-    def _baseline_prediction(self, party_size, hour, occupancy, *args):
-        base = 10
-        if hour in [18, 19]:
-            base += 15
-        if occupancy > 80:
-            base += 10
-        if party_size > 4:
-            base += 5
-        return {
-            "predicted_wait_minutes": base,
-            "confidence": 0.5,
-            "factors": {"note": "Using baseline logic"},
-        }
-
-    def _calculate_confidence(self, party_size, occupancy):
-        confidence = 0.85
-        if party_size > 8:
-            confidence -= 0.15
-        if occupancy > 95:
-            confidence -= 0.1
-        return max(0.5, min(1.0, confidence))
+            logger.error(f"Wait prediction error: {e}")
+            return {"predicted_wait_minutes": int(base_heuristic), "confidence": 0.5}
 
 
 class BusynessPredictor:
-    """
-    Predicts restaurant busyness level (slow/moderate/peak)
-    based on Time, Month, and Weather.
-    """
-
     def __init__(self):
         self.model = None
-        self.model_path = "models/busyness_model.pkl"
-        self.label_mapping = {0: "slow", 1: "moderate", 2: "peak"}
+        self.label_mapping = {0: "Slow", 1: "Moderate", 2: "Peak"}
 
-        self.feature_columns = [
-            "hour",
-            "day_of_week",
-            "month",
-            "avg_party_size",
-            "is_weekend",
-            "is_lunch",
-            "is_dinner",
-            "is_peak_hour",
-            "is_holiday",
-            "weather_cloudy",
-            "weather_rainy",
-            "weather_snowy",
-            "weather_sunny",
-        ]
-        self.load_model()
+        paths = ["models/busyness_model.pkl", "data/models/busyness_model.pkl"]
+        for p in paths:
+            if os.path.exists(p):
+                self.load_model(p)
+                break
 
-    def load_model(self):
-        if os.path.exists(self.model_path):
-            with open(self.model_path, "rb") as f:
+    def load_model(self, path):
+        try:
+            with open(path, "rb") as f:
                 data = pickle.load(f)
-                self.model = data["model"]
-                self.label_mapping = {
-                    v: k for k, v in data.get("label_mapping", {}).items()
-                }
-            print(f"✓ Busyness model loaded")
-        else:
-            print("⚠ No Busyness model found.")
+                if isinstance(data, dict):
+                    self.model = data.get("model")
+                else:
+                    self.model = data
+            logger.info(f"✓ Busyness model loaded from {path}")
+        except Exception as e:
+            logger.error(f"Failed to load busyness model: {e}")
 
     def predict(self, timestamp: datetime, weather: Optional[str] = None) -> Dict:
-        if self.model is None:
-            return {"level": "moderate", "confidence": 0.0, "note": "Model not loaded"}
-
-        hour = timestamp.hour
-        day = timestamp.weekday()
-        month = timestamp.month
-
-        is_weekend = 1 if day in [5, 6] else 0
-        is_peak = 1 if hour in [11, 12, 13, 17, 18, 19, 20] else 0
-        is_lunch = 1 if hour in [11, 12, 13] else 0
-        is_dinner = 1 if hour in [17, 18, 19, 20] else 0
-        is_holiday = 0
-
-        w_cloudy = w_rainy = w_snowy = w_sunny = 0
-
-        if weather:
-            w = weather.lower()
-            if "rain" in w or "drizzle" in w:
-                w_rainy = 1
-            elif "snow" in w:
-                w_snowy = 1
-            elif "cloud" in w:
-                w_cloudy = 1
-            elif "sun" in w or "clear" in w:
-                w_sunny = 1
-
-        avg_party_size = 2.4
-
-        features = pd.DataFrame(
-            [
-                [
-                    hour,
-                    day,
-                    month,
-                    avg_party_size,
-                    is_weekend,
-                    is_lunch,
-                    is_dinner,
-                    is_peak,
-                    is_holiday,
-                    w_cloudy,
-                    w_rainy,
-                    w_snowy,
-                    w_sunny,
-                ]
-            ],
-            columns=self.feature_columns,
-        )
+        if not self.model:
+            return {"level": "Moderate", "confidence": 0.0, "note": "Model missing"}
 
         try:
-            prediction_idx = self.model.predict(features)[0]
-            level = self.label_mapping.get(prediction_idx, "moderate")
-            guests_map = {"slow": 15, "moderate": 45, "peak": 85}
+            # Features: ['hour', 'day', 'month', 'is_weekend']
+            features = pd.DataFrame(
+                [
+                    {
+                        "hour": timestamp.hour,
+                        "day": timestamp.weekday(),
+                        "month": timestamp.month,
+                        "is_weekend": 1 if timestamp.weekday() >= 5 else 0,
+                    }
+                ]
+            )
+
+            # Predict
+            pred_idx = self.model.predict(features)[0]
+            level = self.label_mapping.get(pred_idx, "Moderate")
+
+            # Estimate guests based on level
+            guests_map = {"Slow": 15, "Moderate": 45, "Peak": 85}
+
             return {
                 "level": level,
-                "confidence": 0.85,
                 "expected_guests": guests_map.get(level, 40),
-                "timestamp": timestamp.isoformat(),
+                "confidence": 0.90,
             }
         except Exception as e:
-            print(f"Busyness Prediction Error: {e}")
-            return {"level": "moderate", "expected_guests": 40}
+            logger.error(f"Busyness prediction error: {e}")
+            return {"level": "Moderate", "confidence": 0.0}
 
 
 class ItemSalesPredictor:
-    """
-    Predicts menu item sales for inventory planning.
-    Updated to match the trained model's features.
-    """
-
     def __init__(self):
         self.model = None
-        self.model_path = "models/item_sales_daily_full.pkl"
-        self.label_encoder_item = None
-        self.label_encoder_category = None
-        self.feature_columns = []
-        self.load_model()
+        self.le_item = None
+        self.le_cat = None
 
-    def load_model(self):
-        if os.path.exists(self.model_path):
-            with open(self.model_path, "rb") as f:
+        # Note: Training script saved to data/models/item_sales_model.pkl
+        paths = ["data/models/item_sales_model.pkl", "models/item_sales_model.pkl"]
+        for p in paths:
+            if os.path.exists(p):
+                self.load_model(p)
+                break
+
+    def load_model(self, path):
+        try:
+            with open(path, "rb") as f:
                 data = pickle.load(f)
                 self.model = data["model"]
-                self.label_encoder_item = data.get("label_encoder_item")
-                self.label_encoder_category = data.get("label_encoder_category")
-                self.feature_columns = data.get("feature_cols", [])
-            print(f"✓ Item Sales model loaded ({len(self.feature_columns)} features)")
-        else:
-            print(f"⚠ No Item Sales model found at {self.model_path}")
+                self.le_item = data.get("le_item")  # Changed from label_encoder_item
+                self.le_cat = data.get("le_cat")  # Changed from label_encoder_category
+            logger.info(f"✓ Item Sales model loaded from {path}")
+        except Exception as e:
+            logger.error(f"Failed to load item sales model: {e}")
 
     def predict_daily_sales(
         self,
@@ -349,123 +223,75 @@ class ItemSalesPredictor:
         item_name: str = "Unknown",
         category: str = "Food",
     ) -> Dict:
-        if self.model is None:
-            return {"predicted_quantity": 50, "confidence": 0.0}
+        if not self.model:
+            return {"predicted_quantity": 25, "confidence": 0.0}
 
         try:
-            # Encode item and category
-            if (
-                self.label_encoder_item
-                and item_name in self.label_encoder_item.classes_
-            ):
-                item_encoded = self.label_encoder_item.transform([item_name])[0]
-            else:
-                # Unknown item - use average encoding
+            # 1. Encode Item
+            try:
+                item_encoded = self.le_item.transform([item_name])[0]
+            except:
+                # Unknown item fallback (use 0 or median)
                 item_encoded = 0
 
-            if (
-                self.label_encoder_category
-                and category in self.label_encoder_category.classes_
-            ):
-                category_encoded = self.label_encoder_category.transform([category])[0]
-            else:
-                # Unknown category - use default
-                category_encoded = 0
+            # 2. Encode Category
+            try:
+                cat_encoded = self.le_cat.transform([category])[0]
+            except:
+                cat_encoded = 0
 
-            # Get average price (you might want to pass this in)
-            price = 12.0  # Default price, ideally pass this from item data
-
-            # DateTime features
-            day = date.weekday()
-            month = date.month
-            is_weekend = 1 if day in [5, 6] else 0
-            is_lunch = 1  # Assume both lunch and dinner
-            is_dinner = 1
-
-            # Item type flags
-            item_lower = item_name.lower()
-            is_fried = 1 if "fry" in item_lower or "fried" in item_lower else 0
-            is_banh_mi = 1 if "banh mi" in item_lower else 0
-            is_bowl = 1 if "bowl" in item_lower else 0
-            is_beverage = (
-                1
-                if category.lower() in ["beverage", "na beverage"]
-                or any(x in item_lower for x in ["soda", "water", "tea", "coffee"])
-                else 0
+            # 3. Features: ['item_encoded', 'cat_encoded', 'price', 'day_of_week', 'month', 'is_weekend']
+            features = pd.DataFrame(
+                [
+                    {
+                        "item_encoded": item_encoded,
+                        "cat_encoded": cat_encoded,
+                        "price": 12.0,  # Default price since we don't pass it in API
+                        "day_of_week": date.weekday(),
+                        "month": date.month,
+                        "is_weekend": 1 if date.weekday() >= 5 else 0,
+                    }
+                ]
             )
-            is_salad = 1 if "salad" in item_lower else 0
 
-            # Build feature array in EXACT order from model
-            # Expected: ['item_encoded', 'category_encoded', 'price', 'day_of_week',
-            #            'month', 'is_weekend', 'is_lunch', 'is_dinner', 'is_fried',
-            #            'is_banh_mi', 'is_bowl', 'is_beverage', 'is_salad']
-
-            features_list = [
-                item_encoded,
-                category_encoded,
-                price,
-                day,
-                month,
-                is_weekend,
-                is_lunch,
-                is_dinner,
-                is_fried,
-                is_banh_mi,
-                is_bowl,
-                is_beverage,
-                is_salad,
-            ]
-
-            features = pd.DataFrame([features_list], columns=self.feature_columns)
-
-            # Predict
-            qty = int(self.model.predict(features)[0])
+            # 4. Predict
+            pred = self.model.predict(features)[0]
+            qty = max(0, int(pred))
 
             return {
                 "item_id": item_id,
-                "predicted_quantity": max(0, qty),
-                "confidence": 0.85,  # High confidence with good model
-                "date": date.date().isoformat(),
+                "item_name": item_name,
+                "predicted_quantity": qty,
+                "confidence": 0.85,
+                "date": date.strftime("%Y-%m-%d"),
             }
 
         except Exception as e:
-            print(f"Sales Prediction Error: {e}")
-            import traceback
-
-            traceback.print_exc()
-            return {"predicted_quantity": 50, "confidence": 0.0}
+            logger.error(f"Sales prediction error: {e}")
+            return {"predicted_quantity": 20, "confidence": 0.0}
 
 
-# Global instances
+# Global Instances
 wait_time_predictor = WaitTimePredictor()
 busyness_predictor = BusynessPredictor()
 item_sales_predictor = ItemSalesPredictor()
 
 
 def initialize_models():
-    print("🤖 Initializing ML models...")
-    wait_time_predictor.load_model()
-    busyness_predictor.load_model()
-    item_sales_predictor.load_model()
-    print("✓ ML models ready")
+    """Called by main.py on startup"""
+    pass  # Models load on init now
 
 
-# API Wrappers
-def predict_wait_time(
-    party_size: int,
-    timestamp: datetime,
-    current_occupancy: float,
-    external_factors: Optional[Dict] = None,
-) -> Dict:
-    """Convenience function for API endpoints"""
+# Convenience Wrappers for API
+def predict_wait_time(party_size, timestamp, current_occupancy, external_factors=None):
     return wait_time_predictor.predict(
         party_size, timestamp, current_occupancy, external_factors
     )
 
 
-def predict_busyness(timestamp: datetime, weather: Optional[str] = None) -> Dict:
+def predict_busyness(timestamp, weather=None):
     return busyness_predictor.predict(timestamp, weather)
 
 
-def predict_item_sales(item_id: int, date: datetime):
-    return item_sales_predictor.predict_daily_sales(item_id, date)
+def predict_item_sales(item_id, date, item_name="Unknown", category="Food"):
+    return item_sales_predictor.predict_daily_sales(item_id, date, item_name, category)
