@@ -38,12 +38,12 @@ export const dinemetraAPI = {
   },
 
   async dashboardHealth() {
-    const { data } = await api.get('/health');
+    const { data } = await api.get('/api/monitoring/health');
     return data;
   },
 
   async getModelPerformance() {
-    const { data } = await api.get('/health');
+    const { data } = await api.get('/api/monitoring/health');
     return data;
   },
 
