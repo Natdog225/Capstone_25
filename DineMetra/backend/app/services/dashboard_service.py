@@ -391,17 +391,17 @@ class DashboardService:
             ]
     
     def _get_purchasing_estimates(self) -> List[Dict]:
-        """Get purchasing estimates using ML predictions"""
+        """Get purchasing estimates using item_sales_predictor"""
         purchasing = []
-        
+
         try:
             items = [
-                (1, 'Produce', 'Salads'),
-                (2, 'Meat', 'Entrees'),
-                (3, 'Dairy', 'Desserts'),
-                (4, 'Beverages', 'Beverages')
+                (1, "The Pao", "Entrees"),        # High volume item
+                (2, "Small Kimchi Fry", "Apps"),  # High volume item
+                (3, "Pork Banh Mi", "Entrees"),
+                (4, "Coke", "Beverages"),
             ]
-            
+
             target_date = datetime.now() + timedelta(days=3)
             
             for item_id, item_name, category in items:
