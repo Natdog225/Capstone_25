@@ -160,10 +160,6 @@ const SalesInfoCards = ({ dateRange }) => {
               </div>
             ))}
           </div>
-          <button className="view-all-btn" onClick={handleViewAllEvents}>
-            View All Events (60 Days)
-            <ArrowRight size={16} />
-          </button>
         </div>
 
         {/* Weather Impact */}
