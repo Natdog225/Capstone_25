@@ -33,17 +33,17 @@ import api from './api';
 export const dinemetraAPI = {
   // ===== HEALTH & MONITORING =====
   async healthCheck() {
-    const { data } = await api.get('/');
+    const { data } = await api.get('/api/monitoring/model-performance');
     return data;
   },
 
   async dashboardHealth() {
-    const { data } = await api.get('/health');
+    const { data } = await api.get('/api/dashboard/health');
     return data;
   },
 
   async getModelPerformance() {
-    const { data } = await api.get('/health');
+    const { data } = await api.get('/api/monitoring/model-performance');
     return data;
   },
 
