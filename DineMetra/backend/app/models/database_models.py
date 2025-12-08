@@ -36,6 +36,12 @@ class Order(Base):
     order_total = Column(Float, nullable=False)
     party_size = Column(Integer, default=1)
     order_items = relationship("OrderItem", back_populates="order")
+    
+    # Event features
+    has_event = Column(Integer, default=0)
+    event_count = Column(Integer, default=0)
+    max_event_attendance = Column(Integer, default=0)
+    closest_event_distance = Column(Float, default=99.0)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
