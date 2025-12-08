@@ -11,9 +11,9 @@ import './CSS/Sidebar.css';
 const Sidebar = ({ isOpen, onClose, activeTab, onTabChange }) => {
   const menuItems = [
     { id: 'sales-overview', label: 'Sales Overview', icon: BarChart3 },
-    { id: 'ai-predictions', label: 'Daily AI Predictions', icon: Brain },
     { id: 'sales-metrics', label: 'Sales Metrics', icon: TrendingUp },
-    { id: 'historical-analysis', label: 'Historical Analysis', icon: History }
+    { id: 'historical-analysis', label: 'Historical Analysis', icon: History },
+    { id: 'ai-predictions', label: 'Daily AI Predictions', icon: Brain }
   ];
 
   const handleTabClick = (tabId) => {
@@ -30,7 +30,10 @@ const Sidebar = ({ isOpen, onClose, activeTab, onTabChange }) => {
       />
       
       {/* Sidebar */}
-      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <aside 
+        className={`sidebar ${isOpen ? 'open' : ''}`}
+        onMouseLeave={onClose}
+      >
         <div className="sidebar-header">
           <h2 className="sidebar-title">Navigation</h2>
           <button className="sidebar-close" onClick={onClose}>
