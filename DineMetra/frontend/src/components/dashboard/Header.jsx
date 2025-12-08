@@ -7,7 +7,10 @@ const Header = ({ onLogout, onMenuClick }) => {
     <header className="dashboard-header">
       <div className="header-content">
         <div className="header-left">
-          <button className="hamburger-menu" onClick={onMenuClick}>
+          <button 
+            className="hamburger-menu" 
+            onMouseEnter={onMenuClick}
+          >
             <Menu size={24} />
           </button>
         </div>
