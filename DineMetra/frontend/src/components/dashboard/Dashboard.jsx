@@ -174,7 +174,7 @@ const Dashboard = () => {
         </main>
         
         <footer className="dashboard-footer">
-          <p>Restaurant Dashboard © 2025 | Last updated: {new Date().toLocaleTimeString()}</p>
+          <p>DineMetra © 2025 | Last updated: {new Date().toLocaleTimeString()}</p>
         </footer>
         
         <ApiStatus />
