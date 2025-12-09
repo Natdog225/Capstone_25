@@ -54,7 +54,6 @@ const ChartSection = ({ weekRange = 'this-week' }) => {
 
   // Calculate dynamic stats from real data
   const calculateStats = () => {
-    // Check if it's actually an array
     if (!Array.isArray(chartData) || chartData.length === 0) {
       return { variance: 0 };
     }
@@ -105,18 +104,22 @@ const ChartSection = ({ weekRange = 'this-week' }) => {
         </div>
       </div>
 
+      {/* Custom Chart Legend */}
       <div className="chart-legend-custom">
         <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: '#ffb917' }}></span>
-          <span>This Week</span>
+          <span className="legend-color actual"></span>
+          <span>Actual Sales</span>
         </div>
         <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: '#206EB6' }}></span>
-          <span>Past Data</span>
+          <span className="legend-color last-week"></span>
+          <span>Last Week</span>
         </div>
         <div className="legend-item">
-          <span className="legend-color" style={{ backgroundColor: '#4CAF50' }}></span>
+          <span className="legend-color predicted"></span>
           <span>AI Predicted</span>
+          <span className="accuracy-indicator">
+            (70-95% accuracy)
+          </span>
         </div>
       </div>
 
@@ -149,7 +152,7 @@ const ChartSection = ({ weekRange = 'this-week' }) => {
             name="Past Data"
           />
           <Bar 
-            dataKey="actual" 
+            dataKey="predicted" 
             fill="#4CAF50" 
             radius={[6, 6, 0, 0]}
             name="AI Predicted"
