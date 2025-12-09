@@ -39,6 +39,7 @@ async def get_full_dashboard():
             "highlights": dashboard_service.get_highlights(),
             "metrics": dashboard_service.get_metrics(),
             "info_sections": dashboard_service.get_info_sections(),
+            "sales_chart": dashboard_service.get_sales_chart_data(period="this-week"),
             "user": {"name": "Manager", "restaurant": "Tulsa Capstone Grill"},
             "timestamp": datetime.now().isoformat(),
         }
