@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { History, Clock, ShoppingCart, Users, AlertCircle, Calendar, RefreshCw } from 'lucide-react';
+import { History, Clock, ShoppingCart, Users, AlertCircle, Calendar, RefreshCw, TrendingUp, DollarSign, Activity } from 'lucide-react';
 import { dinemetraAPI } from '../../services/dinemetraService.js';
 import './CSS/HistoricalComparison.css';
 
 // Utility functions
-const getData = (response) => response?.data || {};
 const formatValue = (value, fallback = 'N/A') => (value === null || value === undefined || value === '') ? fallback : value;
 const formatPercent = (value) => (value === null || value === undefined) ? null : parseFloat(value).toFixed(1);
+const formatCurrency = (value) => `$${Math.round(value || 0).toLocaleString()}`;
 
 const HistoricalComparison = ({ dateRange, onDateRangeChange }) => {
   const [historicalData, setHistoricalData] = useState(null);
@@ -17,84 +17,58 @@ const HistoricalComparison = ({ dateRange, onDateRangeChange }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
+  const selectedDate = dateRange?.startDate;
 
   useEffect(() => {
-    if (dateRange?.startDate && dateRange?.endDate) {
+    if (selectedDate) {
       fetchHistoricalData();
     }
-  }, [dateRange, trendsWeeks]);
+  }, [selectedDate, viewMode, trendsWeeks]);
 
   const fetchHistoricalData = async () => {
-    if (!dateRange?.startDate || !dateRange?.endDate) return;
-    
     try {
       setLoading(true);
+      setError(null);
       
-      // Fetch data with date parameters from centralized dateRange
+      // Fetch all data in parallel
       const [waitTimes, sales, busyness, trends, summary] = await Promise.all([
-        dinemetraAPI.compareWaitTimes(dateRange.startDate, dateRange.endDate),
-        dinemetraAPI.compareSales(dateRange.startDate, dateRange.endDate),
-        dinemetraAPI.compareBusyness(dateRange.startDate, dateRange.endDate),
-        dinemetraAPI.getWeeklyTrends(trendsWeeks),
-        dinemetraAPI.getHistoricalSummary(dateRange.startDate, dateRange.endDate)
+        dinemetraAPI.compareWaitTimes(selectedDate),
+        dinemetraAPI.compareSales(selectedDate),
+        dinemetraAPI.compareBusyness(selectedDate),
+        viewMode === 'trends' 
+          ? dinemetraAPI.getDailyTrends(trendsWeeks * 7, selectedDate)
+          : dinemetraAPI.getDailyTrends(30, selectedDate),
+        dinemetraAPI.getHistoricalSummary()
       ]);
 
       setHistoricalData({
-        waitTimes: getData(waitTimes),
-        sales: getData(sales),
-        busyness: getData(busyness),
-        trends: getData(trends),
-        summary: getData(summary)
+        waitTimes,
+        sales,
+        busyness,
+        trends,
+        summary
       });
-      setError(null);
     } catch (err) {
       console.error('Failed to load historical data:', err);
-      setError('Failed to load historical comparisons. Please try again.');
+      setError(err.response?.data?.detail || err.message || 'Failed to load data');
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
-  const handleTrendsWeeksChange = (weeks) => {
-    setTrendsWeeks(parseInt(weeks));
-  };
-
-  const handleDateChange = (field, value) => {
-    onDateRangeChange({ ...dateRange, [field]: value });
-  };
-
-  const handleQuickSelect = (days) => {
-    const endDate = new Date();
-    const startDate = new Date();
-    
-    if (days === 'month') {
-      startDate.setMonth(startDate.getMonth() - 1);
-    } else if (days === 'week') {
-      startDate.setDate(startDate.getDate() - 7);
-    } else if (days === 'today') {
-      // Keep both as today
-    } else {
-      startDate.setDate(startDate.getDate() - days);
-    }
-    
-    onDateRangeChange({
-      startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0]
-    });
+  const handleDateChange = (e) => {
+    const value = e.target.value;
+    onDateRangeChange({ startDate: value, endDate: value });
   };
 
   const handleRefresh = () => {
     setIsRefreshing(true);
-    onDateRangeChange({ ...dateRange });
-    setTimeout(() => setIsRefreshing(false), 1000);
+    fetchHistoricalData();
   };
 
-  const calculateDaysBetween = () => {
-    const start = new Date(dateRange.startDate);
-    const end = new Date(dateRange.endDate);
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays + 1;
+  const handleTrendsWeeksChange = (e) => {
+    setTrendsWeeks(parseInt(e.target.value));
   };
 
   if (loading) {
@@ -109,60 +83,94 @@ const HistoricalComparison = ({ dateRange, onDateRangeChange }) => {
   if (error) {
     return (
       <div className="historical-comparison error">
-        <AlertCircle size={48} style={{ marginBottom: '16px', color: '#dc3545' }} />
+        <AlertCircle size={48} className="header-icon" />
         <p>{error}</p>
-        <button onClick={fetchHistoricalData}>Retry</button>
+        <button onClick={fetchHistoricalData} className="retry-btn">
+          Retry
+        </button>
       </div>
     );
   }
 
-  if (!historicalData) return null;
-
-  const { waitTimes, sales, busyness, trends, summary } = historicalData;
+  const { waitTimes = {}, sales = {}, busyness = {}, trends = {}, summary = {} } = historicalData;
   const orderSummary = summary.orders || {};
   const waitTimeSummary = summary.wait_times || {};
   const totalRecords = (orderSummary.total_records || 0) + (waitTimeSummary.total_records || 0);
 
   return (
     <div className="historical-comparison">
-      {/* Date Range Selector - Now at top of Historical Analysis */}
-      <div className="date-range-container">
-        <div className="date-range-inputs">
-          <div className="date-input-group">
-            <label htmlFor="start-date" className="date-label">From</label>
-            <div className="date-input-wrapper">
-              <Calendar size={16} className="date-icon" />
-              <input 
-                id="start-date"
-                type="date" 
-                value={dateRange.startDate}
-                onChange={(e) => handleDateChange('startDate', e.target.value)}
-                max={dateRange.endDate}
-                className="date-input"
-              />
-            </div>
-          </div>
-          
-          <span className="date-separator">→</span>
-          
-          <div className="date-input-group">
-            <label htmlFor="end-date" className="date-label">To</label>
-            <div className="date-input-wrapper">
-              <Calendar size={16} className="date-icon" />
-              <input 
-                id="end-date"
-                type="date" 
-                value={dateRange.endDate}
-                onChange={(e) => handleDateChange('endDate', e.target.value)}
-                min={dateRange.startDate}
-                max={today}
-                className="date-input"
-              />
-            </div>
-          </div>
-          
+      {/* Date Selector */}
+      <DateSelector 
+        selectedDate={selectedDate}
+        onDateChange={handleDateChange}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
+        today={today}
+      />
+
+      {/* Header */}
+      <Header 
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
+
+      {/* Content */}
+      <div className="content-area">
+        {viewMode === 'overview' && (
+          <OverviewView 
+            waitTimes={waitTimes}
+            sales={sales}
+            busyness={busyness}
+          />
+        )}
+
+        {viewMode === 'details' && (
+          <DetailsView 
+            waitTimes={waitTimes}
+            sales={sales}
+            busyness={busyness}
+            selectedDate={selectedDate}
+          />
+        )}
+
+        {viewMode === 'trends' && (
+          <TrendsView 
+            trends={trends}
+            trendsWeeks={trendsWeeks}
+            onWeeksChange={handleTrendsWeeksChange}
+          />
+        )}
+      </div>
+
+      {/* Summary Footer */}
+      <SummaryFooter
+        selectedDate={selectedDate}
+        totalRecords={totalRecords}
+        viewMode={viewMode}
+      />
+    </div>
+  );
+};
+
+// SUB-COMPONENTS
+
+const DateSelector = ({ selectedDate, onDateChange, onRefresh, isRefreshing, today }) => (
+  <div className="date-range-container">
+    <div className="date-range-inputs">
+      <div className="date-input-group">
+        <label htmlFor="single-date" className="date-label">Select Date</label>
+        <div className="date-input-wrapper">
+          <Calendar size={16} className="date-icon" />
+          <input 
+            id="single-date"
+            type="date" 
+            value={selectedDate || ''}
+            onChange={onDateChange}
+            max={today}
+            className="date-input"
+          />
           <button 
-            onClick={handleRefresh}
+            onClick={onRefresh}
             className="refresh-date-btn"
             disabled={isRefreshing}
             title="Refresh data"
@@ -170,309 +178,241 @@ const HistoricalComparison = ({ dateRange, onDateRangeChange }) => {
             <RefreshCw size={18} className={isRefreshing ? 'spinning' : ''} />
           </button>
         </div>
-        
-        {/* Quick Select Buttons */}
-        <div className="quick-select-buttons">
-          <button 
-            onClick={() => handleQuickSelect('today')}
-            className="quick-select-btn"
-          >
-            Today
-          </button>
-          <button 
-            onClick={() => handleQuickSelect('week')}
-            className="quick-select-btn"
-          >
-            Last 7 Days
-          </button>
-          <button 
-            onClick={() => handleQuickSelect(30)}
-            className="quick-select-btn"
-          >
-            Last 30 Days
-          </button>
-          <button 
-            onClick={() => handleQuickSelect('month')}
-            className="quick-select-btn"
-          >
-            Last Month
-          </button>
-        </div>
-        
-        {/* Display selected range info */}
-        <div className="date-range-info">
-          <span className="range-days">{calculateDaysBetween()} days selected</span>
-        </div>
       </div>
+    </div>
+  </div>
+);
 
-      <div className="comparison-header">
-        <div className="header-main">
-          <History size={28} className="header-icon" />
-          <h2 className="section-title">Historical Analysis</h2>
-        </div>
-        <div className="view-controls">
-          <button 
-            className={`view-btn ${viewMode === 'overview' ? 'active' : ''}`}
-            onClick={() => setViewMode('overview')}
-          >
-            Overview
-          </button>
-          <button 
-            className={`view-btn ${viewMode === 'details' ? 'active' : ''}`}
-            onClick={() => setViewMode('details')}
-          >
-            Details
-          </button>
-          <button 
-            className={`view-btn ${viewMode === 'trends' ? 'active' : ''}`}
-            onClick={() => setViewMode('trends')}
-          >
-            Trends
-          </button>
-        </div>
+const Header = ({ viewMode, onViewModeChange }) => (
+  <div className="comparison-header">
+    <div className="header-main">
+      <History size={28} className="header-icon" />
+      <h2 className="section-title">Historical Analysis</h2>
+    </div>
+    <div className="view-controls">
+      <button className={`view-btn ${viewMode === 'overview' ? 'active' : ''}`} onClick={() => onViewModeChange('overview')}>
+        Overview
+      </button>
+      <button className={`view-btn ${viewMode === 'details' ? 'active' : ''}`} onClick={() => onViewModeChange('details')}>
+        Details
+      </button>
+      <button className={`view-btn ${viewMode === 'trends' ? 'active' : ''}`} onClick={() => onViewModeChange('trends')}>
+        Trends
+      </button>
+    </div>
+  </div>
+);
+
+const OverviewView = ({ waitTimes, sales, busyness }) => (
+  <div className="overview-grid">
+    <MetricCard
+      icon={<Clock className="card-icon" />}
+      title="Wait Times"
+      metric={waitTimes}
+      dataKey="average_minutes"
+      unit="min"
+      countKey="count"
+    />
+    <MetricCard
+      icon={<DollarSign className="card-icon" />}
+      title="Sales Performance"
+      metric={sales}
+      dataKey="total"
+      format={(v) => formatCurrency(v)}
+      countKey="order_count"
+    />
+    <MetricCard
+      icon={<Activity className="card-icon" />}
+      title="Busyness Level"
+      metric={busyness}
+      dataKey="orders_per_hour"
+      unit="/hr"
+      countKey="total_orders"
+    />
+  </div>
+);
+
+const MetricCard = ({ icon, title, metric, dataKey, unit = '', format = null, countKey }) => {
+  const todayVal = metric.today?.[dataKey];
+  const weekVal = metric.last_week?.[dataKey];
+  const yearVal = metric.last_year?.[dataKey];
+
+  return (
+    <div className="comparison-card">
+      <div className="card-header">
+        {icon}
+        <h3>{title}</h3>
       </div>
-
-      {/* Overview Mode */}
-      {viewMode === 'overview' && (
-        <div className="overview-grid">
-          {/* Wait Times Card */}
-          <div className="comparison-card wait-times">
-            <div className="card-header">
-              <Clock size={24} className="card-icon" />
-              <h3>Wait Times</h3>
-            </div>
-            <div className="comparison-row">
-              <div className="period today">
-                <span className="period-label">Today</span>
-                <span className="period-value">
-                  {formatValue(waitTimes.today?.average_minutes, '0')} min
-                </span>
-                <span className="period-subvalue">
-                  {formatValue(waitTimes.today?.count, '0')} orders
-                </span>
-              </div>
-              <div className="period last-week">
-                <span className="period-label">Last Week</span>
-                <span className="period-value">
-                  {formatValue(waitTimes.last_week?.average_minutes, '0')} min
-                </span>
-                <TrendIndicator value={waitTimes.last_week?.change_percent} />
-              </div>
-              <div className="period last-year">
-                <span className="period-label">Last Year</span>
-                <span className="period-value">
-                  {formatValue(waitTimes.last_year?.average_minutes, '0')} min
-                </span>
-                <TrendIndicator value={waitTimes.last_year?.change_percent} />
-              </div>
-            </div>
-            {waitTimes.insight && (
-              <div className="insight-box">
-                <span className="insight-icon">💡</span>
-                <span className="insight-text">{waitTimes.insight}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Sales Card */}
-          <div className="comparison-card sales">
-            <div className="card-header">
-              <ShoppingCart size={24} className="card-icon" />
-              <h3>Sales Performance</h3>
-            </div>
-            <div className="comparison-row">
-              <div className="period today">
-                <span className="period-label">Today</span>
-                <span className="period-value">
-                  ${formatValue(sales.today?.total?.toLocaleString(), '0')}
-                </span>
-                <span className="period-subvalue">
-                  {formatValue(sales.today?.order_count, '0')} orders
-                </span>
-              </div>
-              <div className="period last-week">
-                <span className="period-label">Last Week</span>
-                <span className="period-value">
-                  ${formatValue(sales.last_week?.total?.toLocaleString(), '0')}
-                </span>
-                <TrendIndicator value={sales.last_week?.change_percent} />
-              </div>
-              <div className="period last-year">
-                <span className="period-label">Last Year</span>
-                <span className="period-value">
-                  ${formatValue(sales.last_year?.total?.toLocaleString(), '0')}
-                </span>
-                <TrendIndicator value={sales.last_year?.change_percent} />
-              </div>
-            </div>
-            {sales.insight && (
-              <div className="insight-box">
-                <span className="insight-icon">📊</span>
-                <span className="insight-text">{sales.insight}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Busyness Card */}
-          <div className="comparison-card busyness">
-            <div className="card-header">
-              <Users size={24} className="card-icon" />
-              <h3>Busyness Level</h3>
-            </div>
-            <div className="comparison-row">
-              <div className="period today">
-                <span className="period-label">Today</span>
-                <span className="period-value">
-                  {formatValue(busyness.today?.orders_per_hour, '0')}/hr
-                </span>
-                <span className="period-subvalue">
-                  {formatValue(busyness.today?.total_orders, '0')} total
-                </span>
-              </div>
-              <div className="period last-week">
-                <span className="period-label">Last Week</span>
-                <span className="period-value">
-                  {formatValue(busyness.last_week?.orders_per_hour, '0')}/hr
-                </span>
-                <TrendIndicator value={busyness.last_week?.change_percent} />
-              </div>
-              <div className="period last-year">
-                <span className="period-label">Last Year</span>
-                <span className="period-value">
-                  {formatValue(busyness.last_year?.orders_per_hour, '0')}/hr
-                </span>
-                <TrendIndicator value={busyness.last_year?.change_percent} />
-              </div>
-            </div>
-            {busyness.insight && (
-              <div className="insight-box">
-                <span className="insight-icon">📈</span>
-                <span className="insight-text">{busyness.insight}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Details Mode */}
-      {viewMode === 'details' && (
-        <div className="details-section">
-          <h3>Detailed Metrics</h3>
-          <div className="metrics-table">
-            <p style={{ color: '#6c757d', padding: '20px' }}>
-              Detailed table view coming soon...
-            </p>
-          </div>
-          <div className="current-range-display">
-            <Calendar size={16} />
-            Data range: {dateRange?.startDate} to {dateRange?.endDate}
-          </div>
-        </div>
-      )}
-
-      {/* Trends Mode */}
-      {viewMode === 'trends' && (
-        <div className="trends-section">
-          <div className="trends-header">
-            <h3>{trendsWeeks}-Week Trends</h3>
-            <select 
-              value={trendsWeeks} 
-              onChange={(e) => handleTrendsWeeksChange(e.target.value)}
-              className="trends-weeks-select"
-            >
-              <option value="4">4 Weeks</option>
-              <option value="8">8 Weeks</option>
-              <option value="12">12 Weeks</option>
-              <option value="16">16 Weeks</option>
-            </select>
-          </div>
-          
-          {trends.weekly_data && trends.weekly_data.length > 0 ? (
-            <>
-              <div className="trends-chart">
-                <p style={{ color: '#6c757d', padding: '20px' }}>
-                  Chart visualization would go here
-                  {trends.weekly_data?.length} data points available
-                </p>
-              </div>
-              <div className="trend-summary">
-                <div className="trend-item">
-                  <span className="trend-label">Peak Wait Time</span>
-                  <span className="trend-value">{formatValue(trends.peak_wait_time)}</span>
-                </div>
-                <div className="trend-item">
-                  <span className="trend-label">Avg Daily Sales</span>
-                  <span className="trend-value">
-                    ${formatValue(trends.avg_daily_sales?.toLocaleString(), '0')}
-                  </span>
-                </div>
-                <div className="trend-item">
-                  <span className="trend-label">Busiest Day</span>
-                  <span className="trend-value">{formatValue(trends.busiest_day)}</span>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="insight-box" style={{ marginTop: '20px' }}>
-              <span className="insight-icon">📊</span>
-              <span className="insight-text">
-                No trend data available for the last {trendsWeeks} weeks
-              </span>
-            </div>
-          )}
-          <div className="current-range-display">
-            Trend period: {trends.start_date || 'N/A'} to {trends.end_date || 'N/A'}
-          </div>
-        </div>
-      )}
-
-      {/* Data Summary */}
-      <div className="summary-footer">
-        <div className="summary-item">
-          <span className="summary-label">Data Range</span>
-          <span className="summary-value">
-            {dateRange?.startDate || 'N/A'} to {dateRange?.endDate || 'N/A'}
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Total Records</span>
-          <span className="summary-value">
-            {totalRecords.toLocaleString()}
-          </span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Active View</span>
-          <span className="summary-value" style={{ textTransform: 'capitalize' }}>
-            {viewMode}
-          </span>
-        </div>
+      <div className="comparison-row">
+        <Period label="Selected Date" value={format ? format(todayVal) : `${formatValue(todayVal)}${unit}`} subValue={`${formatValue(metric.today?.[countKey])} orders`} />
+        <Period label="7 Days Prior" value={format ? format(weekVal) : `${formatValue(weekVal)}${unit}`} trend={metric.last_week?.change_percent} />
+        <Period label="1 Year Prior" value={format ? format(yearVal) : `${formatValue(yearVal)}${unit}`} trend={metric.last_year?.change_percent} />
       </div>
-
-      {/* Debug Panel */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="debug-panel">
-          <details className="debug-details">
-            <summary>🔍 Historical Data Debug</summary>
-            <div className="debug-content">
-              <h4>Date Range:</h4>
-              <pre>{JSON.stringify(dateRange, null, 2)}</pre>
-              <h4>Wait Times:</h4>
-              <pre>{JSON.stringify(waitTimes, null, 2)}</pre>
-              <h4>Sales:</h4>
-              <pre>{JSON.stringify(sales, null, 2)}</pre>
-              <h4>Busyness:</h4>
-              <pre>{JSON.stringify(busyness, null, 2)}</pre>
-              <h4>Trends:</h4>
-              <pre>{JSON.stringify(trends, null, 2)}</pre>
-              <h4>Summary:</h4>
-              <pre>{JSON.stringify(summary, null, 2)}</pre>
-            </div>
-          </details>
+      {metric.insight && (
+        <div className="insight-box">
+          <span className="insight-icon">💡</span>
+          <span className="insight-text">{metric.insight}</span>
         </div>
       )}
     </div>
   );
 };
+
+const Period = ({ label, value, subValue, trend }) => (
+  <div className="period today">
+    <span className="period-label">{label}</span>
+    <span className="period-value">{value}</span>
+    {subValue && <span className="period-subvalue">{subValue}</span>}
+    {trend !== undefined && <TrendIndicator value={trend} />}
+  </div>
+);
+
+const DetailsView = ({ waitTimes, sales, busyness, selectedDate }) => (
+  <div className="details-section">
+    <h3>Detailed Metrics Comparison</h3>
+    <DetailsTable waitTimes={waitTimes} sales={sales} busyness={busyness} />
+    <div className="current-range-display">
+      <Calendar size={16} />
+      Selected date: {selectedDate}
+    </div>
+  </div>
+);
+
+const DetailsTable = ({ waitTimes, sales, busyness }) => {
+  const rows = [
+    { metric: 'Avg Wait Time', unit: 'min', keys: ['average_minutes'], sources: [waitTimes] },
+    { metric: 'Wait Time Orders', unit: '', keys: ['count'], sources: [waitTimes] },
+    { metric: 'Total Sales', unit: '', keys: ['total'], sources: [sales], format: (v) => formatCurrency(v) },
+    { metric: 'Sales Orders', unit: '', keys: ['order_count'], sources: [sales] },
+    { metric: 'Orders/Hour', unit: '/hr', keys: ['orders_per_hour'], sources: [busyness] },
+    { metric: 'Total Orders', unit: '', keys: ['total_orders'], sources: [busyness] }
+  ];
+
+  return (
+    <table className="details-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Selected Date</th>
+          <th>7 Days Prior</th>
+          <th>1 Year Prior</th>
+          <th>Week Change</th>
+          <th>Year Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row, idx) => {
+          const todayVal = row.sources[0]?.today?.[row.keys[0]];
+          const weekVal = row.sources[0]?.last_week?.[row.keys[0]];
+          const yearVal = row.sources[0]?.last_year?.[row.keys[0]];
+          const weekChange = row.sources[0]?.last_week?.change_percent;
+          const yearChange = row.sources[0]?.last_year?.change_percent;
+
+          const display = (val) => {
+            if (val === null || val === undefined) return 'N/A';
+            return row.format ? row.format(val) : `${val}${row.unit}`;
+          };
+
+          return (
+            <tr key={idx}>
+              <td><strong>{row.metric}</strong></td>
+              <td>{display(todayVal)}</td>
+              <td>{display(weekVal)}</td>
+              <td>{display(yearVal)}</td>
+              <td><TrendIndicator value={weekChange} /></td>
+              <td><TrendIndicator value={yearChange} /></td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+};
+
+const TrendsView = ({ trends, trendsWeeks, onWeeksChange }) => {
+  const hasData = trends?.daily_data && trends.daily_data.length > 0;
+  const stats = trends.summary_stats || {};
+
+  return (
+    <div className="trends-section">
+      <div className="trends-header">
+        <h3>{trendsWeeks}-Week Trend Analysis</h3>
+        <select value={trendsWeeks} onChange={onWeeksChange} className="trends-weeks-select">
+          <option value="4">4 Weeks</option>
+          <option value="8">8 Weeks</option>
+          <option value="12">12 Weeks</option>
+          <option value="16">16 Weeks</option>
+        </select>
+      </div>
+      
+      {hasData ? (
+        <>
+          <div className="trends-chart">
+            <div className="chart-placeholder">
+              <div className="chart-header">
+                <TrendingUp size={32} className="chart-icon" />
+                <h4>Daily Performance Trends</h4>
+              </div>
+              <p className="chart-info">
+                📈 {trends.daily_data.length} data points available
+              </p>
+              <p className="chart-range">
+                {trends.period?.start_date} to {trends.period?.end_date}
+              </p>
+            </div>
+          </div>
+          
+          <div className="trend-summary">
+            <TrendStat label="Peak Wait Time" value={`${formatValue(stats.peak_wait_time)} min`} />
+            <TrendStat label="Avg Wait Time" value={`${formatValue(stats.avg_wait_time)} min`} />
+            <TrendStat label="Avg Daily Sales" value={formatCurrency(stats.avg_daily_sales)} />
+            <TrendStat label="Total Sales" value={formatCurrency(stats.total_sales)} />
+            <TrendStat label="Total Orders" value={stats.total_orders?.toLocaleString()} />
+            <TrendStat label="Busiest Day" value={stats.busiest_day_of_week} />
+            <TrendStat label="Days Analyzed" value={stats.days_analyzed} />
+            <TrendStat 
+              label="Trend Direction" 
+              value={stats.trend_direction || 'stable'}
+              className={stats.trend_direction}
+            />
+          </div>
+        </>
+      ) : (
+        <div className="insight-box">
+          <span className="insight-icon">📊</span>
+          <span className="insight-text">
+            No trend data available for the last {trendsWeeks} weeks
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const TrendStat = ({ label, value, className = '' }) => (
+  <div className={`trend-item ${className}`}>
+    <span className="trend-label">{label}</span>
+    <span className="trend-value">{value}</span>
+  </div>
+);
+
+const SummaryFooter = ({ selectedDate, totalRecords, viewMode }) => (
+  <div className="summary-footer">
+    <div className="summary-item">
+      <span className="summary-label">Selected Date</span>
+      <span className="summary-value">{selectedDate || 'N/A'}</span>
+    </div>
+    <div className="summary-item">
+      <span className="summary-label">Total Records</span>
+      <span className="summary-value">{totalRecords.toLocaleString()}</span>
+    </div>
+    <div className="summary-item">
+      <span className="summary-label">Active View</span>
+      <span className="summary-value" style={{ textTransform: 'capitalize' }}>{viewMode}</span>
+    </div>
+  </div>
+);
+
 
 const TrendIndicator = ({ value }) => {
   const formattedValue = formatPercent(value);

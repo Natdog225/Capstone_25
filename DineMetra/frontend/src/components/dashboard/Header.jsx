@@ -10,17 +10,24 @@ const Header = ({ onLogout, onMenuClick }) => {
           <button 
             className="hamburger-menu" 
             onMouseEnter={onMenuClick}
+            aria-label="Open menu"
           >
             <Menu size={24} />
           </button>
         </div>
         
-        <img src="/DineMetra_Logo.png" alt="DineMetra Logo" className="header-logo" />
+        <img 
+          src="/DineMetra_Logo.png" 
+          alt="DineMetra Logo" 
+          className="header-logo" 
+          loading="eager"
+        />
         
         <div className="header-right">
           <button 
             onClick={onLogout}
             className="logout-button"
+            aria-label="Logout"
           >
             <LogOut size={18} />
             <span>Logout</span>

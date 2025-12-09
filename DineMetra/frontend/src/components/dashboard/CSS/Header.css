@@ -1,148 +1,155 @@
-/* Header.css - Dark Theme Unified */
+/* Header.css - Dark Theme Unified - IMPROVED RESPONSIVENESS */
 
 .dashboard-header {
-    background: linear-gradient(135deg, #1E1E1E 0%, #2a2a2a 100%);
-    border-bottom: 1px solid rgba(255, 185, 23, 0.3);
-    padding: 2.5rem 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    width: 100%;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 100%;
-    position: relative;
-  }
-  
-  /* Logo and Hamburger */
-  .header-left {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    flex: 1;
-  }
-  
-  .hamburger-menu {
-    background: rgba(255, 185, 23, 0.1);
-    border: 1px solid rgba(255, 185, 23, 0.3);
-    color: #ffb917;
-    padding: 0.75rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .hamburger-menu:hover {
-    background: rgba(255, 185, 23, 0.2);
-    transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(255, 185, 23, 0.3);
-  }
-  
-  .hamburger-menu:active {
-    transform: scale(0.95);
+  background: linear-gradient(135deg, #1E1E1E 0%, #2a2a2a 100%);
+  border-bottom: 1px solid rgba(255, 185, 23, 0.3);
+  padding: clamp(1rem, 2vw, 2.5rem) clamp(0.75rem, 3vw, 2rem);
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  gap: 1rem;
+}
+
+/* Logo with fluid sizing */
+.header-logo {
+  height: clamp(60px, 8vw, 120px);
+  width: clamp(60px, 8vw, 120px);
+  object-fit: cover;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Header elements */
+.header-left, .header-right {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.header-left {
+  justify-content: flex-start;
+}
+
+.header-right {
+  justify-content: flex-end;
+}
+
+/* Buttons with fluid sizing */
+.hamburger-menu, .logout-button {
+  background: rgba(255, 185, 23, 0.1);
+  border: 1px solid rgba(255, 185, 23, 0.3);
+  padding: clamp(0.5rem, 1.5vw, 0.75rem);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+}
+
+.hamburger-menu {
+  color: #ffb917;
+  width: clamp(40px, 6vw, 48px);
+  height: clamp(40px, 6vw, 48px);
+}
+
+.logout-button {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  gap: clamp(0.25rem, 1vw, 0.5rem);
+  white-space: nowrap;
+}
+
+/* Hover effects */
+.hamburger-menu:hover, .logout-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 185, 23, 0.3);
+}
+
+.logout-button:hover {
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Tablet breakpoint (768px - 1024px) */
+@media (max-width: 1024px) {
+  .dashboard-header {
+    padding: 1.5rem 1.25rem;
+    margin-bottom: 1.5rem;
   }
   
   .header-logo {
-    height: 120px;
-    width: 120px;
-    object-fit: cover;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 50%;
+    order: -1;
+    position: static;
+    transform: none;
   }
   
-  .header-right {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex: 1;
+  .header-content {
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
-  /* Logout Button */
-  .logout-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-    padding: 0.625rem 1.25rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+  .header-left, .header-right {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}
+
+/* Mobile breakpoint (< 768px) */
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 1rem 0.75rem;
+    margin-bottom: 1rem;
   }
   
-  .logout-button:hover {
-    background: rgba(239, 68, 68, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2);
+  .header-content {
+    gap: 0.75rem;
   }
   
-  .logout-button:active {
-    transform: translateY(0);
+  .header-logo {
+    order: -1;
+    width: clamp(50px, 12vw, 70px);
+    height: clamp(50px, 12vw, 70px);
   }
   
-  /* Animations */
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+  .hamburger-menu, .logout-button {
+    padding: 0.5rem;
+    width: 40px;
+    height: 40px;
   }
   
-  /* Responsive Design */
-  @media (max-width: 1200px) {
-    .header-content {
-      flex-direction: column;
-      gap: 1.5rem;
-      align-items: center;
-    }
-  
-    .header-left {
-      width: 100%;
-      justify-content: flex-start;
-    }
-  
-    .header-logo {
-      position: static;
-      transform: none;
-      margin: 1rem 0;
-    }
-  
-    .header-right {
-      width: 100%;
-      justify-content: center;
-    }
+  .logout-button span {
+    display: none; /* Hide text on mobile */
+  }
+}
+
+/* Small mobile breakpoint (< 480px) */
+@media (max-width: 480px) {
+  .dashboard-header {
+    padding: 0.75rem 0.5rem;
   }
   
-  @media (max-width: 768px) {
-    .dashboard-header {
-      padding: 1.5rem 1rem;
-    }
-  
-    .header-logo {
-      height: 80px;
-    }
-  
-    .hamburger-menu {
-      padding: 0.625rem;
-    }
-  
-    .logout-button {
-      width: 100%;
-      justify-content: center;
-    }
+  .header-logo {
+    width: clamp(40px, 15vw, 60px);
+    height: clamp(40px, 15vw, 60px);
   }
+  
+  .hamburger-menu, .logout-button {
+    width: 36px;
+    height: 36px;
+  }
+}
