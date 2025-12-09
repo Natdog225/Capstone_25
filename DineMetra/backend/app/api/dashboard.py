@@ -76,27 +76,35 @@ async def get_sales_chart(
     week: str = Query("this-week", description="Period: this-week, last-week, custom")
 ):
     """
-    Returns sales data formatted for frontend chart
-    Frontend expects array: [{ day: "Mon", thisWeek: 100, pastData: 0, actual: 100 }]
+    Returns sales data with THIS WEEK vs LAST WEEK comparison
+    Shows actual progression and historical comparison
     """
     try:
-        # Get data from service - returns { data: [...], trend_percentage, total_sales, period }
-        result = dashboard_service.get_sales_chart_data(period=week)
+        # Get THIS week's data (last 7 days of data)
+        this_week = dashboard_service.get_sales_chart_data(period="this-week")
+        this_week_data = this_week.get('data', [])
         
-        # Extract the data array
-        raw_data = result.get('data', [])
+        # Get LAST week's data (previous 7 days)
+        last_week = dashboard_service.get_sales_chart_data(period="last-week")
+        last_week_data = last_week.get('data', [])
         
-        # Transform to frontend format
+        # Build comparison chart
         formatted = []
-        for item in raw_data:
+        for i in range(7):
+            this_item = this_week_data[i] if i < len(this_week_data) else {'date': '', 'sales': 0}
+            last_item = last_week_data[i] if i < len(last_week_data) else {'sales': 0}
+            
+            day_name = this_item.get('date', ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i])
+            this_sales = round(this_item.get('sales', 0), 2)
+            past_sales = round(last_item.get('sales', 0), 2)
+            
             formatted.append({
-                'day': item['date'],              # "Mon", "Tue", etc
-                'thisWeek': round(item['sales'], 2),
-                'pastData': 0,                    # No comparison data yet
-                'actual': round(item['sales'], 2)
+                'day': day_name,
+                'thisWeek': this_sales,      # Current week (yellow)
+                'pastData': past_sales,       # Last week (blue)
+                'actual': this_sales          # Same as thisWeek (green) - shows actual vs predicted later
             })
         
-        # Return the array directly (frontend expects this)
         return formatted
         
     except Exception as e:
