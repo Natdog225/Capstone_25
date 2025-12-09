@@ -620,7 +620,7 @@ class DashboardService:
                     {
                         "item": item_name,
                         "estimate": f"${total_cost:,.0f}",
-                        "quantity": total_qty,  # This will be BIG now (Fri+Sat+Sun)
+                        "quantity": total_qty,
                         "status": "Weekend Prep",
                         "urgency": "high" if total_qty > 50 else "medium",
                         "confidence": round(final_confidence, 2),

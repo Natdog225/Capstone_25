@@ -75,6 +75,7 @@ app.add_middleware(
 from app.api import dashboard, predictions, websocket
 from app.api.upload import router as upload_router
 from app.api.monitoring import router as monitoring_router
+from app.api.historical import router as historical_router
 
 
 # Include core routers (always present)
@@ -82,6 +83,7 @@ app.include_router(dashboard.router)
 app.include_router(predictions.router)
 app.include_router(upload_router, prefix="/api/upload", tags=["Upload"])
 app.include_router(monitoring_router, prefix="/api/monitoring", tags=["Monitoring"])
+app.include_router(historical_router, prefix="/api/historical", tags=["Historical"])
 
 
 # Include legacy routers for backwards compatibility
