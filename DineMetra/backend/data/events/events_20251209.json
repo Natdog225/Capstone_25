@@ -1,0 +1,184 @@
+{
+  "events": [
+    {
+      "event_name": "Sublime w/ Joyce Manor",
+      "event_type": "concert",
+      "event_datetime": "2025-12-10T19:30:00",
+      "event_date": "2025-12-10",
+      "distance_miles": 0.3765698226643657,
+      "attendance_estimated": 1000,
+      "venue_name": "Tulsa Theater"
+    },
+    {
+      "event_name": "Billy Strings",
+      "event_type": "concert",
+      "event_datetime": "2025-12-10T19:30:00",
+      "event_date": "2025-12-10",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "BILLY STRINGS SUITES",
+      "event_type": "other",
+      "event_datetime": "2025-12-10T19:30:00",
+      "event_date": "2025-12-10",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "BILLY STRINGS  CLUB SEATS",
+      "event_type": "other",
+      "event_datetime": "2025-12-10T19:30:00",
+      "event_date": "2025-12-10",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "BILLY STRINGS  CLUB SEATS",
+      "event_type": "other",
+      "event_datetime": "2025-12-10T19:30:00",
+      "event_date": "2025-12-10",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "BILLY STRINGS UPCHARGE",
+      "event_type": "other",
+      "event_datetime": "2025-12-10T19:30:00",
+      "event_date": "2025-12-10",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "BILLY STRINGS SKY CLUB SEATS",
+      "event_type": "other",
+      "event_datetime": "2025-12-10T19:30:00",
+      "event_date": "2025-12-10",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "Zakk Sabbath w/ Bonfire",
+      "event_type": "concert",
+      "event_datetime": "2025-12-11T19:00:00",
+      "event_date": "2025-12-11",
+      "distance_miles": 0.3765698226643657,
+      "attendance_estimated": 1000,
+      "venue_name": "Tulsa Theater"
+    },
+    {
+      "event_name": "Tulsa Oilers Vs Tahoe Knight Monsters - Game 11",
+      "event_type": "sports",
+      "event_datetime": "2025-12-11T19:05:00",
+      "event_date": "2025-12-11",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TULSA OILERS SUITES",
+      "event_type": "other",
+      "event_datetime": "2025-12-11T19:05:00",
+      "event_date": "2025-12-11",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "Extreme Dwarfanator Wrestling (21+)",
+      "event_type": "sports",
+      "event_datetime": "2025-12-11T20:00:00",
+      "event_date": "2025-12-11",
+      "distance_miles": 1.4159805045363434,
+      "attendance_estimated": 1000,
+      "venue_name": "Whiskey 918"
+    },
+    {
+      "event_name": "Tulsa Oilers Vs Tahoe Knight Monsters - Game 12",
+      "event_type": "sports",
+      "event_datetime": "2025-12-12T19:05:00",
+      "event_date": "2025-12-12",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TULSA OILERS SUITES",
+      "event_type": "other",
+      "event_datetime": "2025-12-12T19:05:00",
+      "event_date": "2025-12-12",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "Tulsa Oilers Vs Tahoe Knight Monsters - Game 13",
+      "event_type": "sports",
+      "event_datetime": "2025-12-14T15:05:00",
+      "event_date": "2025-12-14",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TULSA OILERS SUITES",
+      "event_type": "other",
+      "event_datetime": "2025-12-14T15:05:00",
+      "event_date": "2025-12-14",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "Tulsa Oilers Vs Allen Americans - Game 14",
+      "event_type": "sports",
+      "event_datetime": "2025-12-20T19:05:00",
+      "event_date": "2025-12-20",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TULSA OILERS SUITES",
+      "event_type": "other",
+      "event_datetime": "2025-12-20T19:05:00",
+      "event_date": "2025-12-20",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "My So Called Band (21+)",
+      "event_type": "concert",
+      "event_datetime": "2025-12-20T21:00:00",
+      "event_date": "2025-12-20",
+      "distance_miles": 0.3483307045550841,
+      "attendance_estimated": 1000,
+      "venue_name": "The Vanguard"
+    },
+    {
+      "event_name": "Tulsa Oilers Vs Utah Grizzlies - Game 15",
+      "event_type": "sports",
+      "event_datetime": "2025-12-21T15:05:00",
+      "event_date": "2025-12-21",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    },
+    {
+      "event_name": "TULSA OILERS SUITES",
+      "event_type": "other",
+      "event_datetime": "2025-12-21T15:05:00",
+      "event_date": "2025-12-21",
+      "distance_miles": 0.4410465189408412,
+      "attendance_estimated": 15000,
+      "venue_name": "BOK Center"
+    }
+  ]
+}
