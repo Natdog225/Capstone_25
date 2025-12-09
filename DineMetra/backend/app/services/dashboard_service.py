@@ -145,27 +145,34 @@ class DashboardService:
             ]
 
     def get_sales_chart_data(self, period: str = "this-week") -> List[Dict]:
-        """Get sales chart using REAL historical data from database"""
+        """Get sales chart using REAL historical data (from latest available data)"""
         try:
             db = next(get_db())
             try:
-                today = datetime.now()
+                # Get the LATEST date in our dataset (not today!)
+                latest_order = db.query(func.max(Order.order_timestamp)).scalar()
+                
+                if not latest_order:
+                    return self._empty_chart(period)
+                
+                # Use the latest data date as "today"
+                data_end_date = latest_order
                 
                 # Determine date range based on period
                 if period == "this-week":
-                    # Current week (Monday to today)
-                    start_date = today - timedelta(days=today.weekday())
-                    end_date = today
+                    # Last 7 days from latest data
+                    start_date = data_end_date - timedelta(days=6)
+                    end_date = data_end_date
                     days_to_fetch = 7
                 elif period == "last-week":
-                    # Previous week (Monday to Sunday)
-                    start_date = today - timedelta(days=today.weekday() + 7)
-                    end_date = start_date + timedelta(days=6)
+                    # Previous 7 days before that
+                    end_date = data_end_date - timedelta(days=7)
+                    start_date = end_date - timedelta(days=6)
                     days_to_fetch = 7
                 else:
-                    # Last 7 days
-                    start_date = today - timedelta(days=6)
-                    end_date = today
+                    # Last 7 days of data
+                    start_date = data_end_date - timedelta(days=6)
+                    end_date = data_end_date
                     days_to_fetch = 7
                 
                 # Query REAL daily sales from database
@@ -185,7 +192,7 @@ class DashboardService:
                 
                 # Build chart data for each day
                 chart_data = []
-                current = start_date
+                current = start_date.replace(hour=0, minute=0, second=0)
                 
                 for i in range(days_to_fetch):
                     date_str = current.strftime('%Y-%m-%d')
@@ -214,7 +221,7 @@ class DashboardService:
                 return {
                     'data': chart_data,
                     'trend_percentage': round(trend, 1),
-                    'total_sales': sum(d['sales'] for d in chart_data),
+                    'total_sales': round(sum(d['sales'] for d in chart_data), 2),
                     'period': period
                 }
                 
@@ -223,21 +230,24 @@ class DashboardService:
                 
         except Exception as e:
             logger.error(f"Error getting sales chart: {e}")
-            # Fallback data
-            return {
-                'data': [
-                    {'date': 'Mon', 'sales': 0},
-                    {'date': 'Tue', 'sales': 0},
-                    {'date': 'Wed', 'sales': 0},
-                    {'date': 'Thu', 'sales': 0},
-                    {'date': 'Fri', 'sales': 0},
-                    {'date': 'Sat', 'sales': 0},
-                    {'date': 'Sun', 'sales': 0}
-                ],
-                'trend_percentage': 0,
-                'total_sales': 0,
-                'period': period
-            }
+            return self._empty_chart(period)
+    
+    def _empty_chart(self, period: str):
+        """Return empty chart data"""
+        return {
+            'data': [
+                {'date': 'Mon', 'sales': 0},
+                {'date': 'Tue', 'sales': 0},
+                {'date': 'Wed', 'sales': 0},
+                {'date': 'Thu', 'sales': 0},
+                {'date': 'Fri', 'sales': 0},
+                {'date': 'Sat', 'sales': 0},
+                {'date': 'Sun', 'sales': 0}
+            ],
+            'trend_percentage': 0,
+            'total_sales': 0,
+            'period': period
+        }
 
     def get_metrics(self) -> Dict:
         """Get all metrics for dashboard from DATABASE"""
