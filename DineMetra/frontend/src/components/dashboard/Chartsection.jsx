@@ -116,7 +116,7 @@ const ChartSection = ({ weekRange = 'this-week' }) => {
         </div>
         <div className="legend-item">
           <span className="legend-color" style={{ backgroundColor: '#4CAF50' }}></span>
-          <span>Actual</span>
+          <span>AI Predicted</span>
         </div>
       </div>
 
@@ -152,7 +152,7 @@ const ChartSection = ({ weekRange = 'this-week' }) => {
             dataKey="actual" 
             fill="#4CAF50" 
             radius={[6, 6, 0, 0]}
-            name="Actual"
+            name="AI Predicted"
           />
         </BarChart>
       </ResponsiveContainer>
