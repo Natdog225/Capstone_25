@@ -1,11 +1,11 @@
-/* Header.css - Dark Theme Unified - IMPROVED RESPONSIVENESS */
+@import './theme.css';
 
 .dashboard-header {
-  background: linear-gradient(135deg, #1E1E1E 0%, #2a2a2a 100%);
-  border-bottom: 1px solid rgba(255, 185, 23, 0.3);
+  background: var(--gradient-header);
+  border-bottom: 1px solid var(--border-primary);
   padding: clamp(1rem, 2vw, 2.5rem) clamp(0.75rem, 3vw, 2rem);
   margin-bottom: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-md);
   width: 100%;
   position: sticky;
   top: 0;
@@ -48,9 +48,9 @@
 }
 
 /* Buttons with fluid sizing */
-.hamburger-menu, .logout-button {
+.hamburger-menu, .logout-button, .theme-toggle {
   background: rgba(255, 185, 23, 0.1);
-  border: 1px solid rgba(255, 185, 23, 0.3);
+  border: 1px solid var(--border-primary);
   padding: clamp(0.5rem, 1.5vw, 0.75rem);
   border-radius: 8px;
   cursor: pointer;
@@ -62,7 +62,13 @@
 }
 
 .hamburger-menu {
-  color: #ffb917;
+  color: var(--accent-gold);
+  width: clamp(40px, 6vw, 48px);
+  height: clamp(40px, 6vw, 48px);
+}
+
+.theme-toggle {
+  color: var(--accent-gold);
   width: clamp(40px, 6vw, 48px);
   height: clamp(40px, 6vw, 48px);
 }
@@ -76,12 +82,14 @@
 }
 
 /* Hover effects */
-.hamburger-menu:hover, .logout-button:hover {
+.hamburger-menu:hover, .theme-toggle:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(255, 185, 23, 0.3);
+  background: rgba(255, 185, 23, 0.2);
 }
 
 .logout-button:hover {
+  transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
 }
 
@@ -126,7 +134,7 @@
     height: clamp(50px, 12vw, 70px);
   }
   
-  .hamburger-menu, .logout-button {
+  .hamburger-menu, .logout-button, .theme-toggle {
     padding: 0.5rem;
     width: 40px;
     height: 40px;
@@ -148,7 +156,7 @@
     height: clamp(40px, 15vw, 60px);
   }
   
-  .hamburger-menu, .logout-button {
+  .hamburger-menu, .logout-button, .theme-toggle {
     width: 36px;
     height: 36px;
   }

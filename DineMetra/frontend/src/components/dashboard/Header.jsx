@@ -1,8 +1,8 @@
 import React from 'react';
-import { LogOut, Menu } from 'lucide-react';
+import { LogOut, Menu, Sun, Moon } from 'lucide-react';
 import './CSS/Header.css';
 
-const Header = ({ onLogout, onMenuClick }) => {
+const Header = ({ onLogout, onMenuClick, theme, onThemeToggle }) => {
   return (
     <header className="dashboard-header">
       <div className="header-content">
@@ -15,6 +15,14 @@ const Header = ({ onLogout, onMenuClick }) => {
             <Menu size={24} />
           </button>
         </div>
+        
+        <button 
+          className="theme-toggle"
+          onClick={onThemeToggle}
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
         
         <img 
           src="/DineMetra_Logo.png" 

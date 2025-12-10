@@ -128,15 +128,18 @@ const ChartSection = ({ weekRange = 'this-week' }) => {
           data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+          <CartesianGrid 
+            strokeDasharray="3 3" 
+            stroke="var(--border-secondary)" 
+          />
           <XAxis 
             dataKey="day" 
-            tick={{ fill: '#ffffff' }}
-            axisLine={{ stroke: 'rgba(255, 255, 255, 0.2)' }}
+            tick={{ fill: 'var(--text-primary)' }}
+            axisLine={{ stroke: 'var(--border-primary)' }}
           />
           <YAxis 
-            tick={{ fill: '#ffffff' }}
-            axisLine={{ stroke: 'rgba(255, 255, 255, 0.2)' }}
+            tick={{ fill: 'var(--text-primary)' }}
+            axisLine={{ stroke: 'var(--border-primary)' }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Bar 

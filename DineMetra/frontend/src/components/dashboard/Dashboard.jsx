@@ -8,6 +8,7 @@ import InfoSections from './Infosections';
 import SalesInfoCards from './SalesInfoCards';
 import LaborPrediction from './LaborPrediction';
 import PredictionsPanel from '../PredictionsPanel';
+import FileImport from './FileImport';
 import ApiStatus from './ApiStatus';
 import { auth } from '../../firebase';
 import { signOut } from 'firebase/auth';
@@ -33,6 +34,17 @@ const Dashboard = () => {
   const [apiStatus, setApiStatus] = useState('connecting');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('sales-overview');
+  
+  // Theme state - default to dark
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'dark';
+  });
+
+  // Apply theme on mount and when it changes
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -91,6 +103,10 @@ const Dashboard = () => {
     setActiveTab(tabId);
   };
 
+  const handleThemeToggle = () => {
+    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
+  };
+
   // Render content based on active tab
   const renderTabContent = () => {
     switch (activeTab) {
@@ -116,6 +132,9 @@ const Dashboard = () => {
             <LaborPrediction dateRange={dateRange} />
           </>
         );
+      
+      case 'file-import':
+        return <FileImport />;        
       
       default:
         return (
@@ -167,6 +186,8 @@ const Dashboard = () => {
         <Header 
           onLogout={handleLogout}
           onMenuClick={toggleSidebar}
+          theme={theme}
+          onThemeToggle={handleThemeToggle}
         />
         
         <main className="dashboard-main">

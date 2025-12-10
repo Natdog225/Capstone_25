@@ -1,12 +1,14 @@
-/* PredictionPanel.css - Dark Theme Unified */
+@import './theme.css';
+
+/* PredictionPanel.css - Theme Unified */
 
 .predictions-panel {
   margin: 2rem 0;
   padding: 1.5rem;
-  background: #1E1E1E;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 185, 23, 0.1);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-secondary);
 }
 
 .panel-header {
@@ -19,7 +21,7 @@
 .section-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -28,7 +30,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #ffb917;
+  background: var(--accent-gold);
   color: #1E1E1E;
   border: none;
   border-radius: 6px;
@@ -61,14 +63,14 @@
 
 .prediction-card {
   padding: 24px;
-  border: 1px solid rgba(255, 185, 23, 0.1);
+  border: 1px solid var(--border-secondary);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-hover);
   transition: box-shadow 0.2s ease;
 }
 
 .prediction-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .card-header {
@@ -77,31 +79,31 @@
   gap: 12px;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 185, 23, 0.1);
+  border-bottom: 1px solid var(--border-secondary);
 }
 
 .card-header h3 {
   margin: 0;
   font-size: 1.15rem;
-  color: #ffffff;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .card-header .icon {
-  color: #ffb917;
+  color: var(--accent-gold);
   background: rgba(255, 185, 23, 0.1);
   padding: 6px;
   border-radius: 6px;
 }
 
 .card-header svg {
-    color: #ffb917;
-  }
+  color: var(--accent-gold);
+}
 
 .predict-btn {
   width: 100%;
   padding: 10px;
-  background: #206EB6;
+  background: var(--accent-blue);
   color: #ffffff;
   border: none;
   border-radius: 6px;
@@ -128,7 +130,7 @@
 
 .skeleton-loader {
   height: 80px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 75%);
+  background: linear-gradient(90deg, var(--bg-hover) 25%, rgba(255, 185, 23, 0.1) 50%, var(--bg-hover) 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
   border-radius: 6px;
@@ -160,13 +162,13 @@
 .value-number {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #ffb917;
+  color: var(--accent-gold);
   line-height: 1;
 }
 
 .value-unit {
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -222,7 +224,7 @@
 .busyness-percentage {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .busyness-gauge-container {
@@ -235,11 +237,11 @@
 .busyness-gauge {
   width: 50px;
   height: 100px;
-  background: #2a2a2a;
+  background: var(--bg-hover);
   border-radius: 25px;
   overflow: hidden;
   position: relative;
-  border: 1px solid rgba(255, 185, 23, 0.1);
+  border: 1px solid var(--border-secondary);
 }
 
 .busyness-fill {
@@ -264,12 +266,12 @@
 }
 
 .detail-label {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-tertiary);
 }
 
 .detail-value {
   font-weight: 500;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .recommendation-box {
@@ -278,15 +280,15 @@
   gap: 8px;
   padding: 12px;
   background: rgba(32, 110, 182, 0.15);
-  border-left: 4px solid #206EB6;
+  border-left: 4px solid var(--accent-blue);
   border-radius: 4px;
   font-size: 0.85rem;
-  color: #e3f2fd;
+  color: var(--text-primary);
 }
 
 .recommendation-icon {
   font-size: 1.2rem;
-  color: #206EB6;
+  color: var(--accent-blue);
 }
 
 .recommendation-text {
@@ -310,19 +312,19 @@
 
 .range-label {
   font-size: 0.85rem;
-  color: #ffb917;
+  color: var(--accent-gold);
   font-weight: 500;
 }
 
 .range-values {
   font-size: 0.9rem;
-  color: #ffb917;
+  color: var(--accent-gold);
   font-weight: 600;
 }
 
 .revenue-estimate {
   font-size: 0.9rem;
-  color: #ffb917;
+  color: var(--accent-gold);
   font-weight: 500;
   text-align: center;
   padding: 8px;
@@ -340,12 +342,12 @@
   gap: 8px;
   width: 100%;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 185, 23, 0.1);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-secondary);
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 
@@ -359,7 +361,7 @@
 
 .toggle-icon {
   transition: transform 0.2s ease;
-  color: #ffb917;
+  color: var(--accent-gold);
 }
 
 .factors-list {
@@ -377,19 +379,19 @@
   justify-content: space-between;
   align-items: center;
   padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-hover);
   border-radius: 4px;
   font-size: 0.8rem;
 }
 
 .factor-name {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 
 .factor-value {
   margin-left: 8px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -403,7 +405,7 @@
 }
 
 .info {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-tertiary);
   font-style: italic;
   margin: 0;
   padding: 10px;
@@ -419,13 +421,11 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Add the spin animation */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-/* Ensure disabled states are consistent */
 .predict-btn:disabled,
 .refresh-btn:disabled {
   opacity: 0.6;

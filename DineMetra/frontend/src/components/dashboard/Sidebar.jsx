@@ -3,7 +3,8 @@ import {
   BarChart3, 
   TrendingUp, 
   History, 
-  Brain, 
+  Brain,
+  Upload, 
   X 
 } from 'lucide-react';
 import './CSS/Sidebar.css';
@@ -13,7 +14,8 @@ const Sidebar = ({ isOpen, onClose, activeTab, onTabChange }) => {
     { id: 'sales-overview', label: 'Sales Overview', icon: BarChart3 },
     { id: 'sales-metrics', label: 'Sales Metrics', icon: TrendingUp },
     { id: 'historical-analysis', label: 'Historical Analysis', icon: History },
-    { id: 'ai-predictions', label: 'Daily AI Predictions', icon: Brain }
+    { id: 'ai-predictions', label: 'Daily AI Predictions', icon: Brain },
+    { id: 'file-import', label: 'File Import', icon: Upload }
   ];
 
   const handleTabClick = (tabId) => {

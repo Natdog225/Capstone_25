@@ -1,0 +1,73 @@
+/* theme.css - Global Theme Variables */
+
+:root[data-theme="dark"] {
+    /* Backgrounds */
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #2a2a2a;
+    --bg-card: rgba(30, 30, 30, 0.6);
+    --bg-hover: rgba(255, 255, 255, 0.05);
+    --bg-active: rgba(255, 185, 23, 0.15);
+    
+    /* Text Colors */
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-tertiary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.5);
+    
+    /* Borders */
+    --border-primary: rgba(255, 185, 23, 0.2);
+    --border-secondary: rgba(255, 185, 23, 0.1);
+    --border-hover: rgba(255, 185, 23, 0.4);
+    
+    /* Accent Colors */
+    --accent-gold: #ffb917;
+    --accent-blue: #206EB6;
+    --accent-green: #28a745;
+    --accent-red: #dc3545;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.4);
+    
+    /* Gradients */
+    --gradient-header: linear-gradient(135deg, #1E1E1E 0%, #2a2a2a 100%);
+    --gradient-sidebar: linear-gradient(135deg, #1E1E1E 0%, #2a2a2a 100%);
+    --gradient-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  }
+  
+  :root[data-theme="light"] {
+    /* Backgrounds */
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.9);
+    --bg-hover: rgba(0, 0, 0, 0.05);
+    --bg-active: rgba(255, 185, 23, 0.15);
+    
+    /* Text Colors */
+    --text-primary: #1e1e1e;
+    --text-secondary: rgba(0, 0, 0, 0.7);
+    --text-tertiary: rgba(0, 0, 0, 0.6);
+    --text-muted: rgba(0, 0, 0, 0.5);
+    
+    /* Borders */
+    --border-primary: rgba(255, 185, 23, 0.4);
+    --border-secondary: rgba(0, 0, 0, 0.1);
+    --border-hover: rgba(255, 185, 23, 0.6);
+    
+    /* Accent Colors */
+    --accent-gold: #e5a414;
+    --accent-blue: #1a5a9a;
+    --accent-green: #1e7e34;
+    --accent-red: #c82333;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.15);
+    
+    /* Gradients */
+    --gradient-header: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+    --gradient-sidebar: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+    --gradient-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, transparent 100%);
+  }
