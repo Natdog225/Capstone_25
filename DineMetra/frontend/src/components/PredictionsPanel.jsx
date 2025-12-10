@@ -56,11 +56,11 @@ const BusynessDisplay = ({ data }) => {
     <div className="prediction-display">
       <div className="busyness-header">
         <div className="busyness-level-badge" data-level={level.toLowerCase()}>{level}</div>
-        <div className="busyness-percentage">{Math.round(percentage * 100)}%</div>
+        <div className="busyness-percentage">{Math.round(percentage)}%</div>
       </div>
       <div className="busyness-gauge-container">
         <div className="busyness-gauge">
-          <div className="busyness-fill" style={{ height: `${percentage * 100}%` }} />
+          <div className="busyness-fill" style={{ height: `${percentage}%` }} />
         </div>
         <div className="busyness-details">
           {expectedGuests && <div className="detail-row"><span className="detail-label">Expected Guests</span><span className="detail-value">{expectedGuests}</span></div>}
